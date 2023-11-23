@@ -1,10 +1,14 @@
+#include "game.h"
+#include "logging.h"
+#include "globals.h"
+#include "mytypes.h"
+#include "misc_util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
-
-#include "game.h"
-#include "globals.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -13,6 +17,7 @@
 #include "cimgui.h"
 #include "rlImGui.h"
 
+#define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
 #define TRANSPARENT_SKY_BLUE ((Color){SKYBLUE.r, SKYBLUE.g, SKYBLUE.b, 100})
@@ -25,6 +30,16 @@
 #define GUI_VIEWPORT_WIDTH 500
 #define GUI_VIEWPORT_HEIGHT 900
 
+#define GROUP_NAME_MAX 128
+
+typedef struct TileGroup {
+	char* group_name;
+	Rectangle* tile_rects;
+} TileGroup;
+
+static TileGroup* TileGroup_new(char *group_name);
+static void TileGroup_free(TileGroup* t);
+
 typedef struct Game 
 {
 	Rectangle selection;
@@ -35,7 +50,7 @@ typedef struct Game
 	Vector2 next;
 
 	Camera2D camera;
-	float scroll_factor;
+	f32 scroll_factor;
 	
 	Texture atlas;
 
@@ -44,7 +59,11 @@ typedef struct Game
 	Rectangle image_viewport_rect;
 	Rectangle gui_viewport_rect;
 
-	int window_flags;
+	i32 window_flags;
+
+	TileGroup* tile_group_arr;
+	
+	char group_name[GROUP_NAME_MAX];
 } Game;
 
 static void Game_update(Game* g, float dt);
@@ -94,6 +113,10 @@ Game* Game_new(void)
 
 	g->window_flags |= ImGuiWindowFlags_None;
 
+	g->tile_group_arr = NULL;
+	
+	memset(g->group_name, 0, GROUP_NAME_MAX);
+
 	UnloadImage(atlas);
 	return g;
 }
@@ -116,8 +139,8 @@ static void Game_update(Game* g, float dt)
 		LOG_DEBUG("Camera Target: <%.2f, %.2f>", g->camera.target.x, g->camera.target.y);
 		LOG_DEBUG("Camera Zoom: %.5f", g->camera.zoom);
 		puts("");
-		LOG_DEBUG("g->current position: <%d, %d>", (int)roundf(g->current.x), (int)roundf(g->current.y));
-		LOG_DEBUG("g->next position: <%d, %d>", (int)roundf(g->next.x), (int)roundf(g->next.y));
+		LOG_DEBUG("g->current position: <%d, %d>", (i32)roundf(g->current.x), (i32)roundf(g->current.y));
+		LOG_DEBUG("g->next position: <%d, %d>", (i32)roundf(g->next.x), (i32)roundf(g->next.y));
 		puts("");
 	}
 
@@ -135,10 +158,14 @@ static void Game_update(Game* g, float dt)
 		if (!Vector2Equals(g->next, (Vector2){ 0 }) && Vector2Equals(g->current, (Vector2) { 0 })) 
 		{
 			g->current = GetScreenToWorld2D(mouse_pos, g->camera);
+			g->current.x = roundf(g->current.x);
+			g->current.y = roundf(g->current.y);
 		}
 		else 
 		{
 			g->next = GetScreenToWorld2D(mouse_pos, g->camera);
+			g->next.x = roundf(g->next.x);
+			g->next.y = roundf(g->next.y);
 		}
 	}
 
@@ -148,8 +175,13 @@ static void Game_update(Game* g, float dt)
 		g->next = GetScreenToWorld2D(mouse_pos, g->camera);
 		g->selection_color = TRANSPARENT_VIOLET;
 
-		float width = g->next.x - g->current.x;
-		float height = g->next.y - g->current.y;
+		f32 width = roundf(g->next.x - g->current.x);
+		f32 height = roundf(g->next.y - g->current.y);
+			
+		g->current.x = roundf(g->current.x);
+		g->current.y = roundf(g->current.y);
+		g->next.x = roundf(g->next.x);
+		g->next.y = roundf(g->next.y);
 
 		if (width < 0 && height < 0) 
 		{
@@ -178,7 +210,7 @@ static void Game_update(Game* g, float dt)
 	// For zooming in and out.
 	if (IsKeyDown(KEY_LEFT_CONTROL)) 
 	{
-		float scroll = GetMouseWheelMove();
+		f32 scroll = GetMouseWheelMove();
 		if (scroll != 0) 
 		{
 			scroll *= g->scroll_factor;
@@ -208,9 +240,7 @@ static void Game_update(Game* g, float dt)
 
 static void Game_draw(Game* g) 
 {
-
 	BeginTextureMode(g->image_viewport);
-
 	ClearBackground(DARKGRAY);
 	BeginMode2D(g->camera);
 	{
@@ -220,8 +250,7 @@ static void Game_draw(Game* g)
 		DrawRectangleRec(g->selection, g->selection_color);
 	}
 	EndMode2D();
-
-	EndTextureMode();
+	EndTextureMode(); // End image_viewport
 
 	BeginTextureMode(g->gui_viewport);
 	ClearBackground(GRAY);
@@ -238,7 +267,7 @@ static void Game_draw(Game* g)
 	}
 	
 	rlImGuiEnd();
-	EndTextureMode();
+	EndTextureMode(); // End GUI viewport
 	
 	DrawTextureRec(g->gui_viewport.texture, g->gui_viewport_rect, (Vector2) { 0 }, WHITE);
 	DrawTextureRec(g->image_viewport.texture, g->image_viewport_rect, (Vector2) { g->gui_viewport.texture.width, 0 }, WHITE);
@@ -256,7 +285,7 @@ void Game_run(Game* g)
 {
 	while (!WindowShouldClose()) 
 	{
-		float dt = GetFrameTime();
+		f32 dt = GetFrameTime();
 		Game_update(g, dt);
 
 		BeginDrawing();
@@ -266,5 +295,23 @@ void Game_run(Game* g)
 	Game_free(g);
 	rlImGuiShutdown();
 	CloseWindow();
+}
+
+static TileGroup* TileGroup_new(char *group_name)
+{
+	TileGroup* t = malloc(sizeof(TileGroup));
+	if (t == NULL) {
+		LOG_FATAL("failed to allocate TileGroup");
+	}
+	t->group_name = group_name;
+	t->tile_rects = NULL;
+
+	return t;
+}
+
+static void TileGroup_free(TileGroup* t)
+{
+	free(t->group_name);
+	arrfree(t->tile_rects);
 }
 

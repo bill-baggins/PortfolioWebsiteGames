@@ -24,6 +24,7 @@
     <ProjectGuid>{ac9cbc62-bf56-4026-9b10-dfbab769f422}</ProjectGuid>
     <RootNamespace>AtlasCreator</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>AtlasAddresser</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -134,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="main.c" />
     <ClCompile Include="game.c" />
+    <ClCompile Include="misc_util.c" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\minesweeper.png" />
@@ -141,7 +143,9 @@
   <ItemGroup>
     <ClInclude Include="game.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="logging.h" />
     <ClInclude Include="mytypes.h" />
+    <ClInclude Include="misc_util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
