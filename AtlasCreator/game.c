@@ -25,7 +25,8 @@
 #define GUI_VIEWPORT_WIDTH 500
 #define GUI_VIEWPORT_HEIGHT 900
 
-typedef struct Game {
+typedef struct Game 
+{
 	Rectangle selection;
 	Color selection_color;
 	Color selection_outline_color;
@@ -40,13 +41,18 @@ typedef struct Game {
 
 	RenderTexture image_viewport;
 	RenderTexture gui_viewport;
+	Rectangle image_viewport_rect;
+	Rectangle gui_viewport_rect;
+
+	int window_flags;
 } Game;
 
 static void Game_update(Game* g, float dt);
 static void Game_draw(Game* g);
 static void Game_free(Game* g);
 
-Game* Game_new(void) {
+Game* Game_new(void) 
+{
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, title);
 	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 	SetExitKey(0);
@@ -78,13 +84,33 @@ Game* Game_new(void) {
 	g->image_viewport = LoadRenderTexture(IMAGE_VIEWPORT_WIDTH, IMAGE_VIEWPORT_HEIGHT);
 	g->gui_viewport = LoadRenderTexture(GUI_VIEWPORT_WIDTH, GUI_VIEWPORT_HEIGHT);
 
+	g->image_viewport_rect = (Rectangle){
+		0, 0, (float)g->image_viewport.texture.width, (float)-g->image_viewport.texture.height
+	};
+
+	g->gui_viewport_rect = (Rectangle){
+		0, 0, (float)g->gui_viewport.texture.width, (float)-g->gui_viewport.texture.height
+	};
+
+	g->window_flags |= ImGuiWindowFlags_None;
+
 	UnloadImage(atlas);
 	return g;
 }
 
-static void Game_update(Game* g, float dt) {
+static void Game_update(Game* g, float dt) 
+{
+	Vector2 mouse_pos = GetMousePosition();
+	// This means I am interacting with the GUI on the left side,
+	// not the image viewport.
+	if (mouse_pos.x < GUI_VIEWPORT_WIDTH) {
+		return;
+	}
 
-	if (IsKeyPressed(KEY_Z)) {
+	mouse_pos.x -= GUI_VIEWPORT_WIDTH;
+
+	if (IsKeyPressed(KEY_Z)) 
+	{
 		LOG_DEBUG("Camera information below:");
 		LOG_DEBUG("Camera Offset: <%.2f, %.2f>", g->camera.offset.x, g->camera.offset.y);
 		LOG_DEBUG("Camera Target: <%.2f, %.2f>", g->camera.target.x, g->camera.target.y);
@@ -96,68 +122,83 @@ static void Game_update(Game* g, float dt) {
 	}
 
 	// for dragging the camera
-	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) 
+	{
 		Vector2 mouse_delta = GetMouseDelta();
 		g->camera.target.x += -mouse_delta.x * (1 / g->camera.zoom);
 		g->camera.target.y += -mouse_delta.y * (1 / g->camera.zoom);
 	}
 
 	// Grabs the first point if next is zero, otherwise grabs the new next position.
-	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-		if (!Vector2Equals(g->next, (Vector2){ 0 }) && Vector2Equals(g->current, (Vector2) { 0 })) {
-			g->current = GetScreenToWorld2D(GetMousePosition(), g->camera);
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
+	{
+		if (!Vector2Equals(g->next, (Vector2){ 0 }) && Vector2Equals(g->current, (Vector2) { 0 })) 
+		{
+			g->current = GetScreenToWorld2D(mouse_pos, g->camera);
 		}
-		else {
-			g->next = GetScreenToWorld2D(GetMousePosition(), g->camera);
+		else 
+		{
+			g->next = GetScreenToWorld2D(mouse_pos, g->camera);
 		}
 	}
 
 	// Next point and current point is used to construct a rectangle.
-	if (!Vector2Equals(g->current, (Vector2) { 0 }) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-		g->next = GetScreenToWorld2D(GetMousePosition(), g->camera);
+	if (!Vector2Equals(g->current, (Vector2) { 0 }) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
+	{
+		g->next = GetScreenToWorld2D(mouse_pos, g->camera);
 		g->selection_color = TRANSPARENT_VIOLET;
 
 		float width = g->next.x - g->current.x;
 		float height = g->next.y - g->current.y;
 
-		if (width < 0 && height < 0) {
+		if (width < 0 && height < 0) 
+		{
 			g->selection = (Rectangle){ g->next.x, g->next.y, -width, -height };
 		}
-		else if (height < 0) {
+		else if (height < 0) 
+		{
 			g->selection = (Rectangle){ g->current.x, g->next.y, width, -height };
 		}
-		else if (width < 0) {
+		else if (width < 0) 
+		{
 			g->selection = (Rectangle){ g->next.x, g->current.y, -width, height };
 		}
-		else {
+		else 
+		{
 			g->selection = (Rectangle){ g->current.x, g->current.y, width, height };
 		}
 	}
 
-	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) 
+	{
 		g->next = (Vector2){ 0 };
 		g->selection_color = TRANSPARENT_SKY_BLUE;
 	}
 
 	// For zooming in and out.
-	if (IsKeyDown(KEY_LEFT_CONTROL)) {
+	if (IsKeyDown(KEY_LEFT_CONTROL)) 
+	{
 		float scroll = GetMouseWheelMove();
-		if (scroll != 0) {
+		if (scroll != 0) 
+		{
 			scroll *= g->scroll_factor;
-			if (scroll < 0) {
+			if (scroll < 0) 
+			{
 				g->camera.zoom /= -scroll;
 			}
-			else {
+			else 
+			{
 				g->camera.zoom *= scroll;
 			}
 
-			Vector2 pos = GetScreenToWorld2D(GetMousePosition(), g->camera);
-			g->camera.offset = GetMousePosition();
+			Vector2 pos = GetScreenToWorld2D(mouse_pos, g->camera);
+			g->camera.offset = mouse_pos;
 			g->camera.target = pos;
 		}
 	}
 
-	if (IsKeyPressed(KEY_ESCAPE)) {
+	if (IsKeyPressed(KEY_ESCAPE)) 
+	{
 		g->next = (Vector2){ 0 };
 		g->current = (Vector2){ 0 };
 		g->selection = (Rectangle){ 0 };
@@ -165,9 +206,10 @@ static void Game_update(Game* g, float dt) {
 
 }
 
-static void Game_draw(Game* g) {
+static void Game_draw(Game* g) 
+{
 
-	rlImGuiBegin();
+	BeginTextureMode(g->image_viewport);
 
 	ClearBackground(DARKGRAY);
 	BeginMode2D(g->camera);
@@ -178,16 +220,42 @@ static void Game_draw(Game* g) {
 		DrawRectangleRec(g->selection, g->selection_color);
 	}
 	EndMode2D();
+
+	EndTextureMode();
+
+	BeginTextureMode(g->gui_viewport);
+	ClearBackground(GRAY);
+	rlImGuiBegin();
+
+	if (igBegin("Atlas Creator", NULL, 0)) 
+	{
+		if (igButton("This is a button", (ImVec2){ 50.f, 20.f })) {}
+		igEnd();
+	}
+	else
+	{
+		igEnd();
+	}
+	
 	rlImGuiEnd();
+	EndTextureMode();
+	
+	DrawTextureRec(g->gui_viewport.texture, g->gui_viewport_rect, (Vector2) { 0 }, WHITE);
+	DrawTextureRec(g->image_viewport.texture, g->image_viewport_rect, (Vector2) { g->gui_viewport.texture.width, 0 }, WHITE);
 }
 
-static void Game_free(Game* g) {
+static void Game_free(Game* g) 
+{
 	UnloadTexture(g->atlas);
+	UnloadRenderTexture(g->image_viewport);
+	UnloadRenderTexture(g->gui_viewport);
 	free(g);
 }
 
-void Game_run(Game* g) {
-	while (!WindowShouldClose()) {
+void Game_run(Game* g) 
+{
+	while (!WindowShouldClose()) 
+	{
 		float dt = GetFrameTime();
 		Game_update(g, dt);
 
