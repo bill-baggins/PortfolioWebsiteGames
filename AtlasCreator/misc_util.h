@@ -3,6 +3,6 @@
 
 #include "mytypes.h"
 
-char* string_copy(char* string);
+char* string_copy(str_t str);
 
 #endif

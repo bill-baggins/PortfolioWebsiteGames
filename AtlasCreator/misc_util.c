@@ -4,19 +4,21 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
-char* string_copy(char* string)
+char* string_copy(str_t str)
 {
-	if (string == NULL) return;
-	usize len = strlen(string) + 1;
+	if (str == NULL) return NULL;
+
+	usize len = strlen(str) + 1;
 	char* copy = calloc(len, sizeof(char));
 	if (copy == NULL) 
 	{
 		LOG_FATAL("string_copy failed");
 	}
 	for (i32 i = 0; i < len; i++) {
-		copy[i] = string[i];
+		copy[i] = str[i];
 	}
 
 	return copy;
