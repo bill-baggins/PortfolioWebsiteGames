@@ -40,6 +40,7 @@ void Selector_init(Selector* s, Menu *menu, Vector2 offset)
 	Image atlas = LoadImage("assets/minesweeper.png");
 	ImageColorReplace(&atlas, (Color) { 0x93, 0xbb, 0xec, 255 }, (Color) { 0 });
 	s->atlas = LoadTextureFromImage(atlas);
+	UnloadImage(atlas);
 
 	s->image_viewport = LoadRenderTexture(IMAGE_VIEWPORT_WIDTH, IMAGE_VIEWPORT_HEIGHT);
 

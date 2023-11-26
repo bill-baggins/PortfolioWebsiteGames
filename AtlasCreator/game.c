@@ -80,6 +80,7 @@ void Game_run(Game* g)
 		EndDrawing();
 	}
 	Game_free(g);
+
 	rlImGuiShutdown();
 	CloseWindow();
 }

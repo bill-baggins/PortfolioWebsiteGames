@@ -20,7 +20,9 @@ char* string_copy(str_t str)
 	{
 		LOG_FATAL("string_copy failed");
 	}
-	for (i32 i = 0; i < len; i++) {
+
+	for (i32 i = 0; i < len; i++) 
+	{
 		copy[i] = str[i];
 	}
 

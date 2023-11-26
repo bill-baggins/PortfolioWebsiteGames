@@ -11,8 +11,8 @@ const static char* title = "Atlas Addresser";
 #define GUI_VIEWPORT_WIDTH 600
 #define GUI_VIEWPORT_HEIGHT 900
 
-#define GROUP_NAME_MAX_LENGTH 64
-#define ERROR_MAX_LENGTH 128
+#define MAX_GROUP_NAME_LENGTH 64
+#define MAX_ERROR_LENGTH 128
 
 #define deeparrfree(arr, func) \
 	for (i32 i = 0; i < arrlen((arr)); i++) (func)((arr)[i]); \

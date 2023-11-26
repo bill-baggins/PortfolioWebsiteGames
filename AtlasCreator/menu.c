@@ -50,9 +50,9 @@ void Menu_init(Menu* m, Selector* selector, Vector2 offset)
 
 	m->groups_arr = NULL;
 	m->show_group_name_window = false;
-	memset(m->group_name_buffer, 0, GROUP_NAME_MAX_LENGTH);
+	memset(m->group_name_buffer, 0, MAX_GROUP_NAME_LENGTH);
 
-	memset(m->err_buf, 0, ERROR_MAX_LENGTH);
+	memset(m->err_buf, 0, MAX_ERROR_LENGTH);
 	m->display_error = true;
 	
 	m->selector = selector;
@@ -90,8 +90,6 @@ static void Menu_draw_layout(Menu* m)
 {
 	rlImGuiBegin();
 
-	ImGuiIO* io = igGetIO();
-
 	igSetNextWindowSize((ImVec2) { GUI_VIEWPORT_WIDTH, GUI_VIEWPORT_HEIGHT }, 0);
 	igSetNextWindowPos((ImVec2) { 0, 0}, 0, (ImVec2) { 0, 0 });
 	igBegin("Atlas Addresser", NULL, m->window_flags);
@@ -123,7 +121,9 @@ static void Menu_draw_layout(Menu* m)
 				i32 text_flags = 0;
 				text_flags |= ImGuiInputTextFlags_EnterReturnsTrue;
 				text_flags |= ImGuiInputTextFlags_CallbackCompletion;
-				if (igInputText("Enter Here", m->group_name_buffer, GROUP_NAME_MAX_LENGTH, text_flags, callback_stub, (void*)m))
+				bool enter_key_pressed = igInputText("Enter Here", m->group_name_buffer, MAX_GROUP_NAME_LENGTH, text_flags, callback_stub, (void*)m);
+				bool button_pressed = igButton("OK", (ImVec2) { 80.f, 20.f });
+				if (enter_key_pressed || button_pressed)
 				{
 					i32 return_code = Menu_add_entered_group(m, m->err_buf);
 					if (return_code == -1)
@@ -133,8 +133,7 @@ static void Menu_draw_layout(Menu* m)
 					else
 					{
 						m->display_error = false;
-						memset(m->err_buf, 0, 128);
-
+						memset(m->err_buf, 0, MAX_GROUP_NAME_LENGTH);
 						m->show_group_name_window = false;
 					}
 				}
@@ -152,8 +151,11 @@ static void Menu_draw_layout(Menu* m)
 			// Re-enable the mouse inputs when a name is chosen, or
 			// when the group name window is closed.
 			m->window_flags &= ~(ImGuiWindowFlags_NoMouseInputs);
+			memset(m->err_buf, 0, MAX_ERROR_LENGTH);
+			memset(m->group_name_buffer, 0, MAX_GROUP_NAME_LENGTH);
 		}
 
+		// Lists out the tile groups currently in use.
 		for (i32 i = 0; i < arrlen(m->groups_arr); i++)
 		{
 			char rectangle_string[32] = { 0 };
@@ -208,8 +210,18 @@ static i32 Menu_add_entered_group(Menu* m, str_t err_buf)
 	usize new_name_len = strlen(m->group_name_buffer);
 	if (new_name_len == 0)
 	{
-		snprintf(err_buf, 128, "Tile Group name is empty!");
+		snprintf(err_buf, MAX_ERROR_LENGTH, "Tile Group name is empty!");
 		return -1;
+	}
+
+	for (i32 i = 0; i < new_name_len; i++)
+	{
+		str_t str = m->group_name_buffer;
+		if (str[i] == ' ')
+		{
+			snprintf(err_buf, MAX_ERROR_LENGTH, "Name cannot contain spaces!");
+			return -1;
+		}
 	}
 
 	// Check for duplicates.
@@ -219,7 +231,7 @@ static i32 Menu_add_entered_group(Menu* m, str_t err_buf)
 		usize current_name_len = strlen(current);
 		if (current_name_len == new_name_len && strncmp(current, m->group_name_buffer, current_name_len) == 0)
 		{
-			snprintf(err_buf, 128, "A Tile Group with that name already exists.");
+			snprintf(err_buf, MAX_ERROR_LENGTH, "A Tile Group with that name already exists.");
 			return -1;
 		}
 	}
@@ -229,7 +241,7 @@ static i32 Menu_add_entered_group(Menu* m, str_t err_buf)
 
 	arrpush(m->groups_arr, group);
 
-	memset(m->group_name_buffer, 0, GROUP_NAME_MAX_LENGTH);
+	memset(m->group_name_buffer, 0, MAX_GROUP_NAME_LENGTH);
 
 	return 0;
 }

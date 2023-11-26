@@ -16,9 +16,9 @@ typedef struct Menu
 	Vector2 offset;
 	bool show_group_name_window;
 
-	char group_name_buffer[GROUP_NAME_MAX_LENGTH];
+	char group_name_buffer[MAX_GROUP_NAME_LENGTH];
 	
-	char err_buf[ERROR_MAX_LENGTH];
+	char err_buf[MAX_ERROR_LENGTH];
 	bool display_error;
 
 	struct Selector* selector;
