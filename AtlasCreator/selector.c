@@ -1,4 +1,5 @@
 #include "selector.h"
+#include "menu.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +17,7 @@
 #define TRANSPARENT_DARK_BLUE ((Color){DARKBLUE.r, DARKBLUE.g, DARKBLUE.b, 100})
 #define TRANSPARENT_VIOLET ((Color){VIOLET.r, VIOLET.g, VIOLET.b, 100})
 
-void Selector_init(Selector* s, Vector2 offset)
+void Selector_init(Selector* s, Menu *menu, Vector2 offset)
 {
 	if (NULL == s) 
 	{
@@ -47,6 +48,7 @@ void Selector_init(Selector* s, Vector2 offset)
 	};
 
 	s->offset = offset;
+	s->menu = menu;
 }
 
 void Selector_update(Selector* s, f32 dt)

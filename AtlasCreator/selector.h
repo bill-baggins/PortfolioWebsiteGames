@@ -24,12 +24,14 @@ typedef struct Selector
 	// For adjusting the mouse position based on
 	// where the RenderTexture viewport is placed.
 	Vector2 offset;
+
+	struct Menu* menu;
 } Selector;
 
 // Selector* Selector_new(Selector* s);
 
 // For initializing the contents of a value type.
-void Selector_init(Selector* s, Vector2 offset);
+void Selector_init(Selector* s, struct Menu* menu, Vector2 offset);
 void Selector_update(Selector* s, f32 dt);
 void Selector_draw(Selector* s);
 void Selector_deinit(Selector* s);

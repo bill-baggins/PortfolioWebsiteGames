@@ -15,6 +15,9 @@
 #include "cimgui.h"
 #include "rlImGui.h"
 
+
+// Needed for the structures inside of std_ds.h to work.
+#define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
 
@@ -37,10 +40,10 @@ Game* Game_new(void)
 	}
 
 	g->selector = (Selector){ 0 };
-	Selector_init(&g->selector, (Vector2){GUI_VIEWPORT_WIDTH, 0});
-
 	g->menu = (Menu){ 0 };
-	Menu_init(&g->menu, &g->selector, (Vector2){ 0 });
+	
+	Selector_init(&g->selector, &g->menu, (Vector2) { (float)GUI_VIEWPORT_WIDTH, 0 });
+	Menu_init(&g->menu, &g->selector, (Vector2) { 0, 0 });
 
 	return g;
 }

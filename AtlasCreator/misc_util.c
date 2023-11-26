@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
+
+#include "raylib.h"
 
 char* string_copy(str_t str)
 {
@@ -22,4 +25,10 @@ char* string_copy(str_t str)
 	}
 
 	return copy;
+}
+
+void Rectangle_fmt(str_t buffer, Rectangle rect)
+{
+	int matched = sscanf_s(buffer, "<%f,%f,%f,%f>", &rect.x, &rect.y, &rect.width, &rect.height);
+	assert(matched == 4);
 }
