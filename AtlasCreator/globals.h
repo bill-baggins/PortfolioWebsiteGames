@@ -14,6 +14,9 @@ const static char* title = "Atlas Addresser";
 #define MAX_GROUP_NAME_LENGTH 64
 #define MAX_ERROR_LENGTH 128
 
+#define MAX_ZOOM 15.f
+#define MIN_ZOOM 0.10f
+
 #define deeparrfree(arr, func) \
 	for (i32 i = 0; i < arrlen((arr)); i++) (func)((arr)[i]); \
 	arrfree((arr));

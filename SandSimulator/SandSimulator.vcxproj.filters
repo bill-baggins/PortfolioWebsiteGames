@@ -13,14 +13,59 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\particle">
+      <UniqueIdentifier>{15ebccf3-7f30-49d9-b225-45f2fe445615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\misc">
+      <UniqueIdentifier>{03601d5b-6ee1-4367-9531-af92be7d028a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="world.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="air.c">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="particle_util.c">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="sand.c">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="stone.c">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="water.c">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="misc_util.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="particle.c">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mytypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particle_funcs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="misc_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

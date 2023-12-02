@@ -153,11 +153,11 @@ void Selector_update(Selector* s, f32 dt)
 			scroll *= s->scroll_factor;
 			if (scroll < 0)
 			{
-				s->camera.zoom /= -scroll;
+				s->camera.zoom = max(s->camera.zoom / -scroll, MIN_ZOOM);
 			}
-			else
+			else if (scroll > 0)
 			{
-				s->camera.zoom *= scroll;
+				s->camera.zoom = min(s->camera.zoom * scroll, MAX_ZOOM);
 			}
 
 			Vector2 pos = GetScreenToWorld2D(mouse_pos, s->camera);

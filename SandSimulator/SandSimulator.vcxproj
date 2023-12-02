@@ -46,7 +46,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>true</EnableASAN>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -132,6 +132,8 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <SourceDependenciesFile>$(IntDir)</SourceDependenciesFile>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -164,10 +166,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="air.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="misc_util.c" />
+    <ClCompile Include="particle.c" />
+    <ClCompile Include="particle_util.c" />
+    <ClCompile Include="sand.c" />
+    <ClCompile Include="stone.c" />
+    <ClCompile Include="water.c" />
+    <ClCompile Include="world.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="logging.h" />
+    <ClInclude Include="misc_util.h" />
     <ClInclude Include="mytypes.h" />
+    <ClInclude Include="particle_funcs.h" />
+    <ClInclude Include="world.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
