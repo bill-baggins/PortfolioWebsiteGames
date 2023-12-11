@@ -166,15 +166,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="air.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="misc_util.c" />
-    <ClCompile Include="particle.c" />
-    <ClCompile Include="particle_util.c" />
-    <ClCompile Include="sand.c" />
-    <ClCompile Include="stone.c" />
-    <ClCompile Include="water.c" />
-    <ClCompile Include="world.c" />
+    <ClCompile Include="air.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="misc_util.cpp" />
+    <ClCompile Include="particle.cpp" />
+    <ClCompile Include="particle_util.cpp" />
+    <ClCompile Include="sand.cpp" />
+    <ClCompile Include="stone.cpp" />
+    <ClCompile Include="water.cpp" />
+    <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h" />

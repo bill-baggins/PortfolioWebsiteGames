@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "raylib.h"
+#include "raymath.h"
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include "cimgui.h"
 #include "rlImGui.h"
@@ -31,9 +32,10 @@ static void TileGroup_deinit(TileGroup* t);
 
 // Private methods that operate on the Menu structure.
 static void Menu_draw_layout(Menu* m);
-static i32 Menu_add_entered_group(Menu* m, str_t err_buf);
+static void Menu_add_selected_rectangle(Menu* m, Rectangle **rects);
 
-// Miscellaenous methods.
+// Miscellaenous helper methods.
+static i32 Menu_add_entered_group(Menu* m, str_t err_buf);
 static i32 callback_stub(ImGuiInputTextCallbackData* data);
 
 void Menu_init(Menu* m, Selector* selector, Vector2 offset)
@@ -174,8 +176,7 @@ static void Menu_draw_layout(Menu* m)
 
 				if (igButton("Add Selected", (ImVec2) { 100.f, 20.f }))
 				{
-					// add the current selected rectangle in the 
-					// other viewport.
+					Menu_add_selected_rectangle(m, &m->groups_arr[i].rect_arr);
 				}
 
 				igSameLine(100.f, 50.f);
@@ -205,15 +206,26 @@ static i32 callback_stub(ImGuiInputTextCallbackData* data)
 	return 0;
 }
 
+static void Menu_add_selected_rectangle(Menu* m, Rectangle **rects)
+{
+	Selector* s = m->selector;
+	if (!Rectangle_equals(s->selection, (Rectangle){ 0 }))
+	{
+		arrpush((*rects), s->selection);
+	}
+}
+
 static i32 Menu_add_entered_group(Menu* m, str_t err_buf)
 {
 	usize new_name_len = strlen(m->group_name_buffer);
+
 	if (new_name_len == 0)
 	{
 		snprintf(err_buf, MAX_ERROR_LENGTH, "Tile Group name is empty!");
 		return -1;
 	}
-
+	
+	// No spaces please
 	for (i32 i = 0; i < new_name_len; i++)
 	{
 		str_t str = m->group_name_buffer;

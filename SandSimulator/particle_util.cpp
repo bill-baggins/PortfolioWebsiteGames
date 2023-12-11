@@ -2,7 +2,7 @@
 #include "mytypes.h"
 #include <stdio.h>
 
-static char* particle_types[] = {
+static const char* particle_types[] = {
 	"AIR",
 	"SAND",
 	"WATER",
@@ -23,7 +23,7 @@ bool is_inbounds_v(Vector2 pos)
 void ParticleType_snprintf(char *buffer, usize size, char *fmt, ParticleType type)
 {
 	usize len = sizeof(particle_types) / sizeof(particle_types[0]);
-	char* particle_string = "Unknown";
+	const char* particle_string = "Unknown";
 
 	if ((usize)type < len)
 	{

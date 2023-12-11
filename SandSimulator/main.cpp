@@ -4,9 +4,9 @@
 #include "mytypes.h"
 #include "world.h"
 
-#ifndef STB_DS_IMPLEMENTATION
+#include <thread>
+
 #define STB_DS_IMPLEMENTATION
-#endif
 #include "stb_ds.h"
 
 
@@ -16,22 +16,17 @@ int main(int argc, char* argv[])
 	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 	SetExitKey(0);
 
-	World world = { 0 };
+	World world;
 	World_init(&world);
 
 	while (!WindowShouldClose())
 	{
 		f32 dt = GetFrameTime();
-		Vector2 mp = GetMousePosition();
-		Vector2 md = GetMouseDelta();
-		i32 draw_circle = abs((i32)md.x) + abs((i32)md.y) < 5;
-
-		World_update(&world, dt);
 
 		BeginDrawing();
 		DrawFPS(0, 0);
 
-		World_draw(&world);
+		World_update_draw(&world, dt);
 		
 		EndDrawing();
 	}

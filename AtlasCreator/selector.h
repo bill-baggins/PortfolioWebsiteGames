@@ -6,6 +6,9 @@
 
 typedef struct Selector 
 {
+	Texture cursor;
+	Vector2 cursor_position;
+
 	Rectangle selection;
 	Color selection_color;
 	Color selection_outline_color;

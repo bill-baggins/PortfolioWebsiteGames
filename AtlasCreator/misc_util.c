@@ -31,6 +31,10 @@ char* string_copy(str_t str)
 
 void Rectangle_fmt(str_t buffer, Rectangle rect)
 {
-	int matched = sscanf_s(buffer, "<%f,%f,%f,%f>", &rect.x, &rect.y, &rect.width, &rect.height);
-	assert(matched == 4);
+	snprintf(buffer, 32, "<%.0f,%.0f,%.0f,%.0f>", rect.x, rect.y, rect.width, rect.height);
+}
+
+bool Rectangle_equals(Rectangle a, Rectangle b)
+{
+	return a.x == b.x && a.y == b.y && a.width == b.width && a.height == b.height;
 }

@@ -3,10 +3,9 @@
 #include "mytypes.h"
 #include "globals.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
 #include "stb_ds.h"
 #include "raylib.h"
@@ -14,12 +13,22 @@
 
 
 static bool is_within_radius(f32 x, f32 y, f32 radius);
+static bool is_in_exclusion_list(ParticleType type);
+
 static void create_particle_blob(World *w, Vector2 at, ParticleType type, f32 radius);
 
 static void World_input(World* w, f32 dt);
 static void World_clear_grid(World* w);
 
+static ParticleType update_exclusion_list[] = {
+	AIR,
+	STONE,
+};
 
+static usize EXCLUSION_LEN = sizeof(update_exclusion_list) / sizeof(update_exclusion_list[0]);
+
+// TODO: Collapse update_func and draw_func into update_draw_func again,
+// 3n^2 vs. 2n^2 is an actual measurable difference at my current scale.
 void World_init(World* w)
 {
 	w->background_color = DARKGRAY;
@@ -29,8 +38,7 @@ void World_init(World* w)
 
 	w->current_type = AIR;
 	w->blob_radius = 5.f;
-	w->particle_types = sizeof(update_func) / sizeof(update_func[0]);
-
+	w->particle_types = sizeof(update_draw_func) / sizeof(update_draw_func[0]);
 	memset(w->grid_arr, 0, sizeof(Particle*) * MAX_HEIGHT);
 	for (i32 y = 0; y < MAX_HEIGHT; y++)
 	{
@@ -40,36 +48,30 @@ void World_init(World* w)
 		{
 			w->grid_arr[y][x] = Particle_new(
 				AIR, 
-				(Color) { 0 }, 
-				(Vector2) { x, y }, 
+				Color{ 0 }, 
+				Vector2{ (f32)x, (f32)y }, 
 				& w->sand_texture
 			);
 		}
 	}
 }
 
-void World_update(World* w, f32 dt)
+void World_update_draw(World* w, f32 dt)
 {
 	World_input(w, dt);
 
+	ClearBackground(DARKGRAY);
 	for (i32 y = 0; y < MAX_HEIGHT; y++)
 	{
 		for (i32 x = 0; x < MAX_WIDTH; x++)
 		{
 			Particle* particle = w->grid_arr[y][x];
-			ParticleType type = particle->type;
-			if (type < w->particle_types)
+			if (is_in_exclusion_list(particle->type))
 			{
-				update_func[type](particle, w);
+				continue;
 			}
-		}
-	}
+			
 
-	for (i32 y = 0; y < MAX_HEIGHT; y++)
-	{
-		for (i32 x = 0; x < MAX_WIDTH; x++)
-		{
-			Particle* particle = w->grid_arr[y][x];
 			if (!Vector2Equals(particle->pos, particle->next_pos))
 			{
 				i32 nx = particle->next_pos.x;
@@ -81,16 +83,11 @@ void World_update(World* w, f32 dt)
 				w->grid_arr[ny][nx]->pos = particle->next_pos;
 				w->grid_arr[ny][nx]->next_pos = w->grid_arr[ny][nx]->pos;
 
-				w->grid_arr[y][x]->pos = (Vector2){ x, y };
+				w->grid_arr[y][x]->pos = Vector2{ (f32)x, (f32)y };
 				w->grid_arr[y][x]->next_pos = w->grid_arr[y][x]->pos;
 			}
 		}
 	}
-}
-
-void World_draw(World* w)
-{
-	ClearBackground(DARKGRAY);
 
 	for (i32 y = 0; y < MAX_HEIGHT; y++)
 	{
@@ -100,10 +97,11 @@ void World_draw(World* w)
 			ParticleType type = particle->type;
 			if (type < w->particle_types)
 			{
-				draw_func[type](particle, w);
+				update_draw_func[type](particle, w, dt);
 			}
 		}
 	}
+
 }
 
 void World_deinit(World* w)
@@ -128,8 +126,8 @@ static void World_input(World* w, f32 dt)
 	if (key >= KEY_ONE && key <= KEY_NINE)
 	{
 		char type[32];
-		w->current_type = (ParticleType)(key - KEY_ONE);
-		ParticleType_snprintf(type, 32, "Current Type: %s", w->current_type);
+		w->current_type = static_cast<ParticleType>(key - KEY_ONE);
+		ParticleType_snprintf(type, 32, (char*)"Current Type: %s", w->current_type);
 		printf("%s\n", type);
 	}
 
@@ -152,18 +150,18 @@ static void World_input(World* w, f32 dt)
 		
 		// TODO: This is very slow. Hold control and try moving the
 		// circle around, tanks the FPS. See what I can do about this later.
-		if (Vector2Equals(mouse_delta, (Vector2) { 0 }))
+		if (Vector2Equals(mouse_delta, Vector2{}))
 		{
 			DrawCircleLines(mouse_pos.x, mouse_pos.y, w->blob_radius * PIXEL_WIDTH, BLACK);
 		}
 
 		if (wheel < 0)
 		{
-			w->blob_radius = max(MIN_BLOB_RADIUS, w->blob_radius + wheel);
+			w->blob_radius = std::max(MIN_BLOB_RADIUS, (i32)(w->blob_radius + wheel));
 		}
 		else if (wheel > 0)
 		{
-			w->blob_radius = min(MAX_BLOB_RADIUS, w->blob_radius + wheel);
+			w->blob_radius = std::min(MAX_BLOB_RADIUS, (i32)(w->blob_radius + wheel));
 		}
 	}
 
@@ -184,8 +182,14 @@ static void create_particle_blob(World* w, Vector2 at, ParticleType type, f32 ra
 	{
 		for (i32 x = sx; x <= ex; x++)
 		{
-			if (!is_inbounds(x, y)) continue;
-			if (!is_within_radius((at.x - x), (at.y - y), radius)) continue;
+			if (!is_inbounds(x, y))
+			{
+				continue;
+			}
+			if (!is_within_radius((at.x - x), (at.y - y), radius))
+			{
+				continue;
+			}
 
 			Particle* particle = w->grid_arr[y][x];
 			if (particle->type != w->current_type)
@@ -214,5 +218,17 @@ static bool is_within_radius(f32 x, f32 y, f32 radius)
 {
 	f32 c = sqrtf(x * x + y * y);
 	return c < radius;
+}
+
+static bool is_in_exclusion_list(ParticleType type)
+{
+	for (int i = 0; i < EXCLUSION_LEN; i++)
+	{
+		if (type == update_exclusion_list[i])
+		{
+			return true;
+		}
+	}
+	return false;
 }
 

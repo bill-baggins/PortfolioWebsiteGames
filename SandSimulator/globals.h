@@ -1,8 +1,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define MAX_WIDTH 300
-#define MAX_HEIGHT 180
+#define MAX_WIDTH 600
+#define MAX_HEIGHT 360
 
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 720
@@ -12,5 +12,7 @@
 
 #define MIN_BLOB_RADIUS 1
 #define MAX_BLOB_RADIUS 30
+
+#define TAN (CLITERAL(Color){ 240, 220, 180, 255 })
 
 #endif

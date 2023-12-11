@@ -4,8 +4,9 @@
 #include "raylib.h"
 #include "mytypes.h"
 #include "globals.h"
+#include <cstdio>
 
-typedef struct World
+struct World
 {
 	Color background_color;
 	Texture sand_texture;
@@ -15,11 +16,10 @@ typedef struct World
 	usize particle_types;
 
 	struct Particle** grid_arr[MAX_HEIGHT];
-} World;
+};
 
 void World_init(World* w);
-void World_update(World* w, f32 dt);
-void World_draw(World* w);
+void World_update_draw(World* w, f32 dt);
 void World_deinit(World* w);
 
 #endif

@@ -13,9 +13,9 @@
 #include "logging.h"
 #include "globals.h"
 
-#define TRANSPARENT_SKY_BLUE ((Color){SKYBLUE.r, SKYBLUE.g, SKYBLUE.b, 100})
-#define TRANSPARENT_DARK_BLUE ((Color){DARKBLUE.r, DARKBLUE.g, DARKBLUE.b, 100})
-#define TRANSPARENT_VIOLET ((Color){VIOLET.r, VIOLET.g, VIOLET.b, 100})
+#define TRANSPARENT_SKY_BLUE (CLITERAL(Color){SKYBLUE.r, SKYBLUE.g, SKYBLUE.b, 100})
+#define TRANSPARENT_DARK_BLUE (CLITERAL(Color){DARKBLUE.r, DARKBLUE.g, DARKBLUE.b, 100})
+#define TRANSPARENT_VIOLET (CLITERAL(Color){VIOLET.r, VIOLET.g, VIOLET.b, 100})
 
 void Selector_init(Selector* s, Menu *menu, Vector2 offset)
 {
@@ -24,10 +24,13 @@ void Selector_init(Selector* s, Menu *menu, Vector2 offset)
 		LOG_WARN("Selector struct that got passed in is null");
 		return;
 	}
-	
-	s->camera = (Camera2D){ 0 };
-	s->camera.zoom = 1.0;
 
+	Image cursor_im = GenImageColor(1, 1, TRANSPARENT_SKY_BLUE);
+	s->cursor = LoadTextureFromImage(cursor_im);
+	UnloadImage(cursor_im);
+	s->cursor_position = (Vector2){ 0 };
+	
+	
 	s->selection = (Rectangle){ 0 };
 	s->selection_color = TRANSPARENT_SKY_BLUE;
 	s->selection_outline_color = TRANSPARENT_DARK_BLUE;
@@ -35,6 +38,9 @@ void Selector_init(Selector* s, Menu *menu, Vector2 offset)
 	s->next = (Vector2){ 0 };
 
 	s->scroll_factor = 1.10f;
+
+	s->camera = (Camera2D){ 0 };
+	s->camera.zoom = 1.0;
 
 	// #93bbec = background color of the atlas image.
 	Image atlas = LoadImage("assets/minesweeper.png");
@@ -65,6 +71,10 @@ void Selector_update(Selector* s, f32 dt)
 	{
 		return;
 	}
+
+	s->cursor_position = GetScreenToWorld2D(mouse_pos, s->camera);
+	s->cursor_position.x = roundf(s->cursor_position.x);
+	s->cursor_position.y = roundf(s->cursor_position.y);
 	
 
 	if (IsKeyPressed(KEY_Z))
@@ -185,6 +195,7 @@ void Selector_draw(Selector* s)
 		DrawTexture(s->atlas, 0, 0, RAYWHITE);
 		DrawRectangleLinesEx(s->selection, 1, s->selection_outline_color);
 		DrawRectangleRec(s->selection, s->selection_color);
+		DrawTextureV(s->cursor, s->cursor_position, WHITE);
 	}
 	EndMode2D();
 	EndTextureMode(); // End image_viewport

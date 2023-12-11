@@ -21,31 +21,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="world.c">
+    <ClCompile Include="world.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="air.c">
+    <ClCompile Include="air.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
-    <ClCompile Include="particle_util.c">
+    <ClCompile Include="particle_util.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
-    <ClCompile Include="sand.c">
+    <ClCompile Include="sand.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
-    <ClCompile Include="stone.c">
+    <ClCompile Include="stone.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
-    <ClCompile Include="water.c">
+    <ClCompile Include="water.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
-    <ClCompile Include="misc_util.c">
+    <ClCompile Include="misc_util.cpp">
       <Filter>Source Files\misc</Filter>
     </ClCompile>
-    <ClCompile Include="particle.c">
+    <ClCompile Include="particle.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
   </ItemGroup>
