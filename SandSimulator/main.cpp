@@ -4,8 +4,6 @@
 #include "mytypes.h"
 #include "world.h"
 
-#include <thread>
-
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 

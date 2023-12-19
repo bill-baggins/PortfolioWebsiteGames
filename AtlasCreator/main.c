@@ -1,5 +1,13 @@
 #include "game.h"
 
+/*
+	TODO: Need to find a way to resolve having different
+	frame sizes for each frame of an animation.
+	
+	Maybe just consider working on writing to a JSON
+	file first before delving into this?
+*/
+
 int main(int argc, char* argv[]) 
 {
 	Game* game = Game_new();

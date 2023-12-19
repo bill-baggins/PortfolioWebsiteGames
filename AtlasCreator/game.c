@@ -77,6 +77,9 @@ void Game_run(Game* g)
 
 		BeginDrawing();
 		Game_draw(g);
+
+		// DrawTexturePro(texture, src, dest)
+
 		EndDrawing();
 	}
 	Game_free(g);

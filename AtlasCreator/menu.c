@@ -168,10 +168,30 @@ static void Menu_draw_layout(Menu* m)
 			{
 				Rectangle* rects = tile_group.rect_arr;
 				igText("Rectangles: %d", arrlen(rects));
-				for (i32 i = 0; i < arrlen(rects); i++)
+
+				i32 remove_index = -1;
+
+				for (i32 j = 0; j < arrlen(rects);)
 				{
-					Rectangle_fmt(rectangle_string, rects[i]);
+					i32 test_len = arrlen(rects);
+					Rectangle_fmt(rectangle_string, rects[j]);
 					igText(rectangle_string);
+					igSameLine(140.f, 20.0f);
+
+
+					// Give the buttons unique names by putting the number
+					// at the end. Cut off the numbers by making the 
+					// button sizes intentionally "too small"
+					char buffer[32] = { 0 };
+					snprintf(buffer, 32, "Remove %d", j);
+
+					if (igButton(buffer, (ImVec2) { 60.f, 20.f }))
+					{
+						arrdel(rects, j);
+						continue;
+					}
+
+					j += 1;
 				}
 
 				if (igButton("Add Selected", (ImVec2) { 100.f, 20.f }))
@@ -180,7 +200,7 @@ static void Menu_draw_layout(Menu* m)
 				}
 
 				igSameLine(100.f, 50.f);
-				if (igButton("Remove", (ImVec2) { 100.f, 20.f }))
+				if (igButton("Remove Group", (ImVec2) { 100.f, 20.f }))
 				{
 					TileGroup_deinit(&m->groups_arr[i]);
 					arrdel(m->groups_arr, i);
@@ -209,6 +229,17 @@ static i32 callback_stub(ImGuiInputTextCallbackData* data)
 static void Menu_add_selected_rectangle(Menu* m, Rectangle **rects)
 {
 	Selector* s = m->selector;
+	Rectangle* rects_ref = *rects;
+	
+	// Check that no duplicates exist.
+	for (i32 i = 0; i < arrlen(rects_ref); i++)
+	{
+		if (Rectangle_equals(rects_ref[i], s->selection))
+		{
+			return;
+		}
+	}
+
 	if (!Rectangle_equals(s->selection, (Rectangle){ 0 }))
 	{
 		arrpush((*rects), s->selection);

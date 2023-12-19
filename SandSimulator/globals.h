@@ -1,8 +1,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define MAX_WIDTH 600
-#define MAX_HEIGHT 360
+#define MAX_WIDTH 300
+#define MAX_HEIGHT 180
 
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 720
