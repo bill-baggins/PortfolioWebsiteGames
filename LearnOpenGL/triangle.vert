@@ -1,42 +1,39 @@
 #version 460 core
 
 layout (location = 0) in vec3 a_pos;
+layout (location = 1) in vec3 a_color;
+layout (location = 2) in vec2 tex_coords;
 
 out vec4 vert_color;
+out vec2 tex_coord;
 
-uniform float time;
+uniform float time_elapsed;
+uniform float dt;
+uniform vec2 pos;
 
 void main() 
 {
+	// vert_color = vec4(a_color, 1.0);
+	// oscillates the color of the texture.
 	vert_color = vec4(
-		0.2 + cos(sin(time) + a_pos.x),
-		0.3 + sin(cos(time) + a_pos.y),
-		sin(sin(time) + a_pos.z),
+		0.5 + cos(cos(time_elapsed) + a_color.x),
+		0.5 + sin(sin(time_elapsed) + a_color.y),
+		0.5 + cos(sin(time_elapsed) + a_color.z),
 		1.0
 	);
+	
+	tex_coord = tex_coords;
 
-	gl_Position = vec4(0.5 * cos(time) + a_pos.x, 0.5 * sin(time) + a_pos.y, a_pos.z, 1.0);
+	vec2 new_pos = a_pos.xy + pos;
+
+	gl_Position = vec4(new_pos, 0.0, 1.0);
 }
 
 
-/*
-#version 460 core
-
-layout (location = 0) in vec3 a_pos;
-
-out vec4 vert_color;
-
-uniform float time;
-
-void main() 
-{
-	vert_color = vec4(
-		0.5 + cos(time + abs(a_pos.y)),
-		0.5 + cos(abs(time + a_pos.x)),
-		0.5 + cos(time + a_pos.z),
-		1.0
-	);
-	gl_Position = vec4(a_pos.x, a_pos.y, a_pos.y, 1.0);
-}
-
-*/
+// spins in a circle.
+//	gl_Position = vec4(
+//		0.5 * cos(time) + a_pos.x,
+//		0.5 * sin(time) + (a_pos.y),
+//		a_pos.z,
+//		1.0
+//	);
