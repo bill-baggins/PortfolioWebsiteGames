@@ -1,14 +1,12 @@
 #include "particle_funcs.h"
 
-void init_air(Particle* p, World* w)
+void init_air(Particle* p)
 {
 	p->color = Color{};
 	p->type = AIR;
-	p->texture = &w->sand_texture;
+	p->index = I_AIR;
 }
 
-void update_draw_air(Particle* p, World* w, f32 dt) 
+void update_draw_air(Particle* p, f32 dt) 
 {
 }
-
-void deinit_air(Particle* p, World* w) {}

@@ -20,14 +20,14 @@ bool is_inbounds_v(Vector2 pos)
 }
 
 
-void ParticleType_snprintf(char *buffer, usize size, char *fmt, ParticleType type)
+void ParticleType_snprintf(char *buffer, usize size, char *fmt, ParticleIndex index)
 {
 	usize len = sizeof(particle_types) / sizeof(particle_types[0]);
 	const char* particle_string = "Unknown";
 
-	if ((usize)type < len)
+	if ((usize)index < len)
 	{
-		particle_string = particle_types[type];
+		particle_string = particle_types[index];
 	}
 	snprintf(buffer, size, fmt, particle_string);
 }

@@ -4,18 +4,22 @@
 
 #include <stdio.h>
 
-static void calculate_next_move(Particle* p, World* w);
-static bool is_blocking(i32 x, i32 y, World* w);
+static void calculate_next_move(Particle* p);
+static bool is_blocking(i32 x, i32 y);
 
-#define EXCLUSIONLEN (sizeof(exclusion_list)/sizeof(exclusion_list[0]))
-
-static ParticleType exclusion_list[] = {
-	AIR,
+static i32 MOVE_OPS_WATER[][2] = {
+	{ 0, 1},
+	{ -1, 1 },
+	{ 1, 1},
+	{ 1, 0 },
+	{ -1, 0 },
 };
+static i32 RAND_POOL_WATER[5][2] = { 0 };
 
-void init_water(Particle* p, World* w)
+void init_water(Particle* p)
 {
 	p->type = WATER;
+	p->index = I_WATER;
 	p->color = BLUE;
 	p->color = Color{
 		p->color.r,
@@ -25,20 +29,15 @@ void init_water(Particle* p, World* w)
 	};
 }
 
-void update_draw_water(Particle* p, World* w, f32 dt)
+void update_draw_water(Particle* p, f32 dt)
 {
-	calculate_next_move(p, w);
+	calculate_next_move(p);
 
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }
 
-void deinit_water(Particle* p, World* w)
-{
-
-}
-
-static void calculate_next_move(Particle* p, World* w)
+static void calculate_next_move(Particle* p)
 {
 	i32 sx = p->pos.x;
 	i32 sy = p->pos.y;
@@ -49,48 +48,28 @@ static void calculate_next_move(Particle* p, World* w)
 		return;
 	}
 
-	i32 move_ops[][2] = {
-		{ sx, sy + 1},
-		{ sx - 1, sy + 1 },
-		{ sx + 1, sy + 1},
-		{ sx + 1, sy },
-		{ sx - 1, sy },
-	};
-
-	i32 rand_pool[5][2] = { 0 };
 	i32 push_ind = 0;
 
 	for (i32 i = 0; i < 5; i++)
 	{
-		i32 x = move_ops[i][0];
-		i32 y = move_ops[i][1];
+		i32 x = sx + MOVE_OPS_WATER[i][0];
+		i32 y = sy + MOVE_OPS_WATER[i][1];
+
 		if (!is_inbounds(x, y))
 		{
 			continue;
 		}
 
-		if (i == 0 && !is_blocking(x, y, w))
+		if (i == 0 && !is_blocking(x, y))
 		{
 			p->next_pos = Vector2{ (f32)x, (f32)y };
 			return;
 		}
 
-		// If both options are free don't take it.
-		if (i == 2)
+		if (!is_blocking(x, y))
 		{
-			bool left_free = !is_blocking(move_ops[1][0], move_ops[1][1], w);
-			bool right_free = !is_blocking(move_ops[2][0], move_ops[2][1], w);
-			if (left_free && right_free)
-			{
-				p->next_pos = p->pos;
-				return;
-			}
-		}
-
-		if (!is_blocking(x, y, w))
-		{
-			rand_pool[push_ind][0] = x;
-			rand_pool[push_ind][1] = y;
+			RAND_POOL_WATER[push_ind][0] = x;
+			RAND_POOL_WATER[push_ind][1] = y;
 			push_ind++;
 		}
 	}
@@ -103,22 +82,11 @@ static void calculate_next_move(Particle* p, World* w)
 		return;
 	}
 
-	i32* rand_next_pos = rand_pool[GetRandomValue(0, push_ind - 1)];
+	i32* rand_next_pos = RAND_POOL_WATER[GetRandomValue(0, push_ind - 1)];
 	p->next_pos = Vector2{ (f32)rand_next_pos[0], (f32)rand_next_pos[1] };
 }
 
-static bool is_blocking(i32 x, i32 y, World* w)
+static bool is_blocking(i32 x, i32 y)
 {
-	if (!is_inbounds(x, y)) return true;
-
-	Particle* p = w->grid_arr[y][x];
-	for (i32 i = 0; i < EXCLUSIONLEN; i++)
-	{
-		if (p->type == exclusion_list[i])
-		{
-			return false;
-		}
-	}
-
-	return true;
+	return !(grid_arr[y * MAX_WIDTH + x].type & AIR);
 }

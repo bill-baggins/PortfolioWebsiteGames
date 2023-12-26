@@ -4,6 +4,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -331,7 +335,7 @@ i32 main(i32 argc, char* argv[])
 	usize verts_length = sizeof(verts) / sizeof(f32);
 
 
-	ShapeGL rect = ShapeGL(verts, left_triangle_indices, verts_length, indices_length);
+	ShapeGL rect(verts, left_triangle_indices, verts_length, indices_length);
 	rect.bind_vao();
 	rect.bind_vbo(GL_STATIC_DRAW);
 	rect.bind_ebo(GL_STATIC_DRAW);
@@ -347,41 +351,57 @@ i32 main(i32 argc, char* argv[])
 	glfwSetWindowUserPointer(window, &toggle_wireframes);
 
 	GLenum mode = GL_FILL;
-	f32 rect_pos[2] = { 0.0f, 0.0f };
-	f32 rect_vel[2] = { 0.005f, 0.0045f };
+	glm::vec2 rect_pos(0.0f, 0.0f);
+	glm::vec2 rect_vel(0.005f, 0.0045f);
+
+	f32 angle = 0.0f;
+	f32 angle_increment = 0.0005f;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Update
 		f32 time_elapsed = glfwGetTime();
 		f32 dt = 1.f / 60.f;
-		rect_pos[0] += rect_vel[0] * dt;
-		if (rect_pos[0] > 0.5f)
+
+		rect_pos.x += rect_vel.x * dt;
+		if (rect_pos.x > 0.5f)
 		{
-			rect_pos[0] = 0.5f;
-			rect_vel[0] *= -1;
+			rect_pos.x = 0.5f;
+			rect_vel.x *= -1;
 		}
-		else if (rect_pos[0] < -0.5f)
+		else if (rect_pos.x < -0.5f)
 		{
-			rect_pos[0] = -0.5f;
-			rect_vel[0] *= -1;
+			rect_pos.x = -0.5f;
+			rect_vel.x *= -1;
 
 		}
 
-		rect_pos[1] += rect_vel[1] * dt;
-		if (rect_pos[1] > 0.5f)
+		rect_pos.y += rect_vel.y * dt;
+		if (rect_pos.y > 0.5f)
 		{
-			rect_pos[1] = 0.5f;
-			rect_vel[1] *= -1;
+			rect_pos.y = 0.5f;
+			rect_vel.y *= -1;
 		}
-		if (rect_pos[1] < -0.5f)
+		if (rect_pos.y < -0.5f)
 		{
-			rect_pos[1] = -0.5f;
-			rect_vel[1] *= -1;
+			rect_pos.y = -0.5f;
+			rect_vel.y *= -1;
 		}
+
+		angle += angle_increment;
+		if (angle > glm::two_pi<f32>())
+		{
+			angle = 0.0f;
+		}
+
+		glm::mat4 transform(1.0f);
+		transform = glm::translate(transform, glm::vec3(rect_pos.x, rect_pos.y, 0.0));
+		transform = glm::rotate(transform, angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glProgramUniform1fv(triangle_shader, glGetUniformLocation(triangle_shader, "time_elapsed"), 1, &time_elapsed);
 		glProgramUniform1fv(triangle_shader, glGetUniformLocation(triangle_shader, "dt"), 1, &dt);
-		glProgramUniform2fv(triangle_shader, glGetUniformLocation(triangle_shader, "pos"), 1, rect_pos);
+		glProgramUniform2fv(triangle_shader, glGetUniformLocation(triangle_shader, "pos"), 1, glm::value_ptr(rect_pos));
+		glProgramUniformMatrix4fv(triangle_shader, glGetUniformLocation(triangle_shader, "transform"), 1, GL_FALSE, glm::value_ptr(transform));
 
 		// Draw
 		mode = toggle_wireframes ? GL_LINE : GL_FILL;

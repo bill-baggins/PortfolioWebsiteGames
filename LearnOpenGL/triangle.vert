@@ -7,6 +7,7 @@ layout (location = 2) in vec2 tex_coords;
 out vec4 vert_color;
 out vec2 tex_coord;
 
+uniform mat4 transform;
 uniform float time_elapsed;
 uniform float dt;
 uniform vec2 pos;
@@ -24,9 +25,10 @@ void main()
 	
 	tex_coord = tex_coords;
 
-	vec2 new_pos = a_pos.xy + pos;
+	vec4 new_pos = vec4(a_pos.xy + pos, 0.0, 1.0);
+	vec4 new_transform = transform * new_pos;
 
-	gl_Position = vec4(new_pos, 0.0, 1.0);
+	gl_Position = new_transform;
 }
 
 

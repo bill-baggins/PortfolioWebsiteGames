@@ -7,25 +7,21 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "stb_ds.h"
 #include "raylib.h"
 #include "raymath.h"
 
+// TODO: This is windows specific...
+#include <ppl.h>
+
 
 static bool is_within_radius(f32 x, f32 y, f32 radius);
-static bool is_in_exclusion_list(ParticleType type);
 
-static void create_particle_blob(World *w, Vector2 at, ParticleType type, f32 radius);
+static void create_particle_blob(World *w, Vector2 at, f32 radius);
 
 static void World_input(World* w, f32 dt);
 static void World_clear_grid(World* w);
 
-static ParticleType update_exclusion_list[] = {
-	AIR,
-	STONE,
-};
-
-static usize EXCLUSION_LEN = sizeof(update_exclusion_list) / sizeof(update_exclusion_list[0]);
+static i32 EXCLUSION_BITS = AIR | STONE;
 
 // TODO: Collapse update_func and draw_func into update_draw_func again,
 // 3n^2 vs. 2n^2 is an actual measurable difference at my current scale.
@@ -36,24 +32,9 @@ void World_init(World* w)
 	w->sand_texture = LoadTextureFromImage(im);
 	UnloadImage(im);
 
-	w->current_type = AIR;
+	w->type_index = I_AIR;
 	w->blob_radius = 5.f;
 	w->particle_types = sizeof(update_draw_func) / sizeof(update_draw_func[0]);
-	memset(w->grid_arr, 0, sizeof(Particle*) * MAX_HEIGHT);
-	for (i32 y = 0; y < MAX_HEIGHT; y++)
-	{
-		arrsetcap(w->grid_arr[y], MAX_WIDTH);
-
-		for (i32 x = 0; x < MAX_WIDTH; x++)
-		{
-			w->grid_arr[y][x] = Particle_new(
-				AIR, 
-				Color{ 0 }, 
-				Vector2{ (f32)x, (f32)y }, 
-				& w->sand_texture
-			);
-		}
-	}
 }
 
 void World_update_draw(World* w, f32 dt)
@@ -61,60 +42,46 @@ void World_update_draw(World* w, f32 dt)
 	World_input(w, dt);
 
 	ClearBackground(DARKGRAY);
-	for (i32 y = 0; y < MAX_HEIGHT; y++)
-	{
-		for (i32 x = 0; x < MAX_WIDTH; x++)
+
+	concurrency::parallel_for(0, MAX_WIDTH * MAX_HEIGHT, 1, [](usize i) {
+		Particle particle = grid_arr[i];
+
+		if (particle.type & EXCLUSION_BITS)
 		{
-			Particle* particle = w->grid_arr[y][x];
-			if (is_in_exclusion_list(particle->type))
-			{
-				continue;
-			}
-			
-
-			if (!Vector2Equals(particle->pos, particle->next_pos))
-			{
-				i32 nx = particle->next_pos.x;
-				i32 ny = particle->next_pos.y;
-
-				w->grid_arr[y][x] = w->grid_arr[ny][nx];
-				w->grid_arr[ny][nx] = particle;
-
-				w->grid_arr[ny][nx]->pos = particle->next_pos;
-				w->grid_arr[ny][nx]->next_pos = w->grid_arr[ny][nx]->pos;
-
-				w->grid_arr[y][x]->pos = Vector2{ (f32)x, (f32)y };
-				w->grid_arr[y][x]->next_pos = w->grid_arr[y][x]->pos;
-			}
+			return;
 		}
-	}
 
-	for (i32 y = 0; y < MAX_HEIGHT; y++)
-	{
-		for (i32 x = 0; x < MAX_WIDTH; x++)
+
+		if (!Vector2Equals(particle.pos, particle.next_pos))
 		{
-			Particle* particle = w->grid_arr[y][x];
-			ParticleType type = particle->type;
-			if (type < w->particle_types)
-			{
-				update_draw_func[type](particle, w, dt);
-			}
+			usize nx = particle.next_pos.x;
+			usize ny = particle.next_pos.y;
+			Vector2 pos = grid_arr[i].pos;
+
+			grid_arr[i] = grid_arr[ny * MAX_WIDTH + nx];
+			grid_arr[ny * MAX_WIDTH + nx] = particle;
+
+			grid_arr[ny * MAX_WIDTH + nx].pos = particle.next_pos;
+			grid_arr[ny * MAX_WIDTH + nx].next_pos = grid_arr[ny * MAX_WIDTH + nx].pos;
+
+			grid_arr[i].pos = pos;
+			grid_arr[i].next_pos = grid_arr[i].pos;
 		}
+	});
+
+	for (i32 i = 0; i < MAX_WIDTH * MAX_HEIGHT; i++)
+	{
+		Particle* particle = &grid_arr[i];
+		update_draw_func[particle->index](particle, dt);
 	}
 
 }
 
 void World_deinit(World* w)
 {
-	for (i32 y = 0; y < MAX_HEIGHT; y++)
+	for (i32 i = 0; i < MAX_WIDTH * MAX_HEIGHT; i++)
 	{
-		for (i32 x = 0; x < MAX_WIDTH; x++)
-		{
-			Particle* particle = w->grid_arr[y][x];
-			Particle_free(particle);
-		}
-
-		arrfree(w->grid_arr[y]);
+		Particle_free(&grid_arr[i]);
 	}
 
 	UnloadTexture(w->sand_texture);
@@ -126,8 +93,8 @@ static void World_input(World* w, f32 dt)
 	if (key >= KEY_ONE && key <= KEY_NINE)
 	{
 		char type[32];
-		w->current_type = static_cast<ParticleType>(key - KEY_ONE);
-		ParticleType_snprintf(type, 32, (char*)"Current Type: %s", w->current_type);
+		w->type_index = static_cast<ParticleIndex>(key - KEY_ONE);
+		ParticleType_snprintf(type, 32, (char*)"Current Type: %s", w->type_index);
 		printf("%s\n", type);
 	}
 
@@ -138,7 +105,7 @@ static void World_input(World* w, f32 dt)
 		clicked_pos.y /= PIXEL_HEIGHT;
 		if (is_inbounds_v(clicked_pos))
 		{
-			create_particle_blob(w, clicked_pos, w->current_type, w->blob_radius);
+			create_particle_blob(w, clicked_pos, w->blob_radius);
 		}
 	}
 
@@ -171,7 +138,7 @@ static void World_input(World* w, f32 dt)
 	}
 }
 
-static void create_particle_blob(World* w, Vector2 at, ParticleType type, f32 radius)
+static void create_particle_blob(World* w, Vector2 at, f32 radius)
 {
 	i32 sy = at.y - radius;
 	i32 sx = at.x - radius;
@@ -191,11 +158,10 @@ static void create_particle_blob(World* w, Vector2 at, ParticleType type, f32 ra
 				continue;
 			}
 
-			Particle* particle = w->grid_arr[y][x];
-			if (particle->type != w->current_type)
+			Particle *particle = &grid_arr[y * MAX_WIDTH + x];
+			if (particle->index != w->type_index)
 			{
-				deinit_func[particle->type](particle, w);
-				init_func[w->current_type](particle, w);
+				init_func[w->type_index](particle);
 			}
 		}
 	}
@@ -207,9 +173,8 @@ static void World_clear_grid(World* w)
 	{
 		for (i32 x = 0; x < MAX_WIDTH; x++)
 		{
-			Particle* particle = w->grid_arr[y][x];
-			deinit_func[particle->type](particle, w);
-			init_func[AIR](particle, w);
+			Particle* particle = &grid_arr[y * MAX_WIDTH + x];
+			init_func[I_AIR](particle);
 		}
 	}
 }
@@ -218,17 +183,5 @@ static bool is_within_radius(f32 x, f32 y, f32 radius)
 {
 	f32 c = sqrtf(x * x + y * y);
 	return c < radius;
-}
-
-static bool is_in_exclusion_list(ParticleType type)
-{
-	for (int i = 0; i < EXCLUSION_LEN; i++)
-	{
-		if (type == update_exclusion_list[i])
-		{
-			return true;
-		}
-	}
-	return false;
 }
 

@@ -8,14 +8,12 @@
 
 struct World
 {
-	Color background_color;
 	Texture sand_texture;
-	enum ParticleType current_type;
-	f32 blob_radius;
-
+	Color background_color;
 	usize particle_types;
 
-	struct Particle** grid_arr[MAX_HEIGHT];
+	f32 blob_radius;
+	enum ParticleIndex type_index;
 };
 
 void World_init(World* w);
