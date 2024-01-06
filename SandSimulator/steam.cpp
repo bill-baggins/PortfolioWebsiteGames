@@ -2,41 +2,41 @@
 #include "world.h"
 #include "globals.h"
 
-#include <stdio.h>
+#include "raylib.h"
+#include "raymath.h"
+
+#include <cstdio>
 
 static bool calculate_next_move(Particle* p);
 static bool is_blocking(i32 x, i32 y);
 
-static i32 MOVE_OPS_WATER[][2] = {
-	{ 0, 1},
-	{ -1, 1 },
-	{ 1, 1},
+static i32 BLOCKING_BITS_STEAM = SAND | STONE | WOOD;
+static i32 MOVE_OPS_STEAM[][2] = {
+	{ 0, -1 },
+	{ -1, -1 },
+	{ 1, -1},
 	{ 1, 0 },
 	{ -1, 0 },
 };
-static i32 RAND_POOL_WATER[5][2] = { 0 };
 
-void init_water(Particle* p)
+static i32 RAND_POOL_STEAM[5][2] = { 0 };
+
+void init_steam(Particle* p)
 {
-	p->type = WATER;
-	p->index = I_WATER;
-	p->color = WATER_COLOR;
+	p->type = STEAM;
+	p->index = I_STEAM;
+	p->color = STEAM_COLOR;
 	p->color = Color{
 		p->color.r,
 		(u8)(p->color.g + p->offset.g),
 		(u8)(p->color.b + p->offset.b),
-		200
+		150
 	};
 }
 
-void update_draw_water(Particle* p, f32 dt)
+void update_draw_steam(Particle* p, f32 dt)
 {
-	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
-	bool has_stopped = calculate_next_move(p);
-	if (has_stopped)
-	{
-		p->vel = Vector2{};
-	}
+	bool _ = calculate_next_move(p);
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }
@@ -44,7 +44,7 @@ void update_draw_water(Particle* p, f32 dt)
 static bool calculate_next_move(Particle* p)
 {
 	i32 sx = p->pos.x;
-	i32 sy = p->pos.y + p->vel.y;
+	i32 sy = p->pos.y;
 
 	// Vertically out of bounds, do not consider.
 	if (!is_inbounds(0, sy))
@@ -56,24 +56,18 @@ static bool calculate_next_move(Particle* p)
 
 	for (i32 i = 0; i < 5; i++)
 	{
-		i32 x = sx + MOVE_OPS_WATER[i][0];
-		i32 y = sy + MOVE_OPS_WATER[i][1];
+		i32 x = sx + MOVE_OPS_STEAM[i][0];
+		i32 y = sy + MOVE_OPS_STEAM[i][1];
 
 		if (!is_inbounds(x, y))
 		{
 			continue;
 		}
 
-		if (i == 0 && !is_blocking(x, y))
-		{
-			p->next_pos = Vector2{ (f32)x, (f32)y };
-			return false;
-		}
-
 		if (!is_blocking(x, y))
 		{
-			RAND_POOL_WATER[push_ind][0] = x;
-			RAND_POOL_WATER[push_ind][1] = y;
+			RAND_POOL_STEAM[push_ind][0] = x;
+			RAND_POOL_STEAM[push_ind][1] = y;
 			push_ind++;
 		}
 	}
@@ -86,7 +80,7 @@ static bool calculate_next_move(Particle* p)
 		return true;
 	}
 
-	i32* rand_next_pos = RAND_POOL_WATER[GetRandomValue(0, push_ind - 1)];
+	i32* rand_next_pos = RAND_POOL_STEAM[GetRandomValue(0, push_ind - 1)];
 	p->next_pos = Vector2{ (f32)rand_next_pos[0], (f32)rand_next_pos[1] };
 
 	return false;
@@ -95,5 +89,5 @@ static bool calculate_next_move(Particle* p)
 static bool is_blocking(i32 x, i32 y)
 {
 	i32 coord = y * MAX_WIDTH + x;
-	return !(grid_arr[coord].type & (AIR | TOXIC_GAS | STEAM | SMOKE ));
+	return grid_arr[coord].type & BLOCKING_BITS_STEAM;
 }

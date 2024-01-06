@@ -8,14 +8,19 @@
 
 #include <cstring>
 
+#include "imgui.h"
+#include "rlImGui.h"
+
 int main() 
 {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sand!");
-	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
+	SetTargetFPS(60);
 	SetExitKey(0);
 
 	World world;
 	World_init(&world);
+
+	rlImGuiSetup(true);
 
 
 	for (i32 y = 0; y < MAX_HEIGHT; y++)
@@ -37,18 +42,20 @@ int main()
 
 	LOG_DEBUG("Size of the array: %llu", sizeof(grid_arr));
 
+	
+
 	while (!WindowShouldClose())
 	{
 		f32 dt = GetFrameTime();
 
 		BeginDrawing();
-
 		World_update_draw(&world, dt);
-		
 		DrawFPS(0, 0);
 		EndDrawing();
 	}
 	World_deinit(&world);
+
+	rlImGuiShutdown();
 
 	CloseWindow();
 

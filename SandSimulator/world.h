@@ -14,6 +14,7 @@ struct World
 
 	f32 blob_radius;
 	enum ParticleIndex type_index;
+	bool show_window;
 };
 
 void World_init(World* w);

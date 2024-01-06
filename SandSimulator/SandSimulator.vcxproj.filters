@@ -48,6 +48,27 @@
     <ClCompile Include="particle.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
+    <ClCompile Include="acid.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="toxic_gas.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="steam.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="lava.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="fire.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="wood.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="smoke.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mytypes.h">

@@ -163,6 +163,9 @@
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FloatingPointModel>Precise</FloatingPointModel>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,14 +177,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="acid.cpp" />
     <ClCompile Include="air.cpp" />
+    <ClCompile Include="fire.cpp" />
+    <ClCompile Include="lava.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="misc_util.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particle_util.cpp" />
     <ClCompile Include="sand.cpp" />
+    <ClCompile Include="smoke.cpp" />
+    <ClCompile Include="steam.cpp" />
     <ClCompile Include="stone.cpp" />
+    <ClCompile Include="toxic_gas.cpp" />
     <ClCompile Include="water.cpp" />
+    <ClCompile Include="wood.cpp" />
     <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>

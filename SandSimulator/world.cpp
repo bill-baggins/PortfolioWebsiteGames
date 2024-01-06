@@ -10,8 +10,12 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include "imgui.h"
+#include "rlImGui.h"
+
 // TODO: This is windows specific...
-#include <ppl.h>
+// // See omment down bleow about this.
+// #include <ppl.h>
 
 
 static bool is_within_radius(f32 x, f32 y, f32 radius);
@@ -20,8 +24,6 @@ static void create_particle_blob(World *w, Vector2 at, f32 radius);
 
 static void World_input(World* w, f32 dt);
 static void World_clear_grid(World* w);
-
-static i32 EXCLUSION_BITS = AIR | STONE;
 
 // TODO: Collapse update_func and draw_func into update_draw_func again,
 // 3n^2 vs. 2n^2 is an actual measurable difference at my current scale.
@@ -35,39 +37,16 @@ void World_init(World* w)
 	w->type_index = I_AIR;
 	w->blob_radius = 5.f;
 	w->particle_types = sizeof(update_draw_func) / sizeof(update_draw_func[0]);
+	w->show_window = false;
 }
 
 void World_update_draw(World* w, f32 dt)
 {
+	static char buffer[32]{ 0 }; 
 	World_input(w, dt);
 
 	ClearBackground(DARKGRAY);
 
-	concurrency::parallel_for(0, MAX_WIDTH * MAX_HEIGHT, 1, [](usize i) {
-		Particle particle = grid_arr[i];
-
-		if (particle.type & EXCLUSION_BITS)
-		{
-			return;
-		}
-
-
-		if (!Vector2Equals(particle.pos, particle.next_pos))
-		{
-			usize nx = particle.next_pos.x;
-			usize ny = particle.next_pos.y;
-			Vector2 pos = grid_arr[i].pos;
-
-			grid_arr[i] = grid_arr[ny * MAX_WIDTH + nx];
-			grid_arr[ny * MAX_WIDTH + nx] = particle;
-
-			grid_arr[ny * MAX_WIDTH + nx].pos = particle.next_pos;
-			grid_arr[ny * MAX_WIDTH + nx].next_pos = grid_arr[ny * MAX_WIDTH + nx].pos;
-
-			grid_arr[i].pos = pos;
-			grid_arr[i].next_pos = grid_arr[i].pos;
-		}
-	});
 
 	for (i32 i = 0; i < MAX_WIDTH * MAX_HEIGHT; i++)
 	{
@@ -75,6 +54,44 @@ void World_update_draw(World* w, f32 dt)
 		update_draw_func[particle->index](particle, dt);
 	}
 
+	// Could use the concurrency::parallel_for() funcitons from the windows
+	// header ppl.h, but for simiplicity I am sticking with a normal for loop.
+	for (i32 i = 0; i < MAX_WIDTH * MAX_HEIGHT; i++) {
+		Particle particle = grid_arr[i];
+
+		usize nx = particle.next_pos.x;
+		usize ny = particle.next_pos.y;
+		Vector2 pos = grid_arr[i].pos;
+
+		grid_arr[i] = grid_arr[ny * MAX_WIDTH + nx];
+		grid_arr[ny * MAX_WIDTH + nx] = particle;
+
+		grid_arr[ny * MAX_WIDTH + nx].pos = particle.next_pos;
+		grid_arr[ny * MAX_WIDTH + nx].next_pos = grid_arr[ny * MAX_WIDTH + nx].pos;
+
+		grid_arr[i].pos = pos;
+		grid_arr[i].next_pos = grid_arr[i].pos;
+	}
+
+	DrawText("Press TAB to show the Sand menu.", SCREEN_WIDTH - 180, 0, 10, GOLD);
+
+	rlImGuiBegin();
+	if (w->show_window)
+	{
+		ImGui::SetNextWindowSize(ImVec2{ 200, 500 }, 0);
+		ImGui::SetNextWindowPos(ImVec2{ SCREEN_WIDTH - 200, 0 }, 0, ImVec2{ 0, 0 });
+		ImGui::Begin("Sands", &w->show_window, 0);
+		{
+			for (i32 i = 0; i < PARTICLE_COLORS_LENGTH; i++)
+			{
+				ParticleType_snprintf(buffer, 32, (char*)"%s", (ParticleIndex)i);
+				ImGui::RadioButton(buffer, (i32*)&w->type_index, i);
+				memset(buffer, 0, sizeof(buffer));
+			}
+		}
+		ImGui::End();
+	}
+	rlImGuiEnd();
 }
 
 void World_deinit(World* w)
@@ -89,14 +106,6 @@ void World_deinit(World* w)
 
 static void World_input(World* w, f32 dt)
 {
-	i32 key = GetKeyPressed();
-	if (key >= KEY_ONE && key <= KEY_NINE)
-	{
-		char type[32];
-		w->type_index = static_cast<ParticleIndex>(key - KEY_ONE);
-		ParticleType_snprintf(type, 32, (char*)"Current Type: %s", w->type_index);
-		printf("%s\n", type);
-	}
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 	{
@@ -107,6 +116,11 @@ static void World_input(World* w, f32 dt)
 		{
 			create_particle_blob(w, clicked_pos, w->blob_radius);
 		}
+	}
+	
+	if (IsKeyPressed(KEY_TAB))
+	{
+		w->show_window = !w->show_window;
 	}
 
 	if (IsKeyDown(KEY_LEFT_CONTROL))

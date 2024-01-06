@@ -3,17 +3,18 @@
 #include "globals.h"
 
 #include "raylib.h"
+#include "raymath.h"
 
-#include <stdio.h>
+#include <cstdio>
 
-static void calculate_next_move(Particle* p);
+static bool calculate_next_move(Particle* p);
 static bool is_blocking(i32 x, i32 y);
 
 static i32 BLOCKING_BITS_SAND = SAND | STONE;
 static i32 MOVE_OPS_SAND[][2] = {
-	{ 0, 0 },
-	{ 1, 0 },
-	{-1, 0 },
+	{ 0, 1 },
+	{ 1, 1 },
+	{-1, 1 },
 };
 
 static i32 RAND_POOL_SAND[3][2] = { 0 };
@@ -22,7 +23,7 @@ void init_sand(Particle* p)
 {
 	p->type = SAND;
 	p->index = I_SAND;
-	p->color = TAN;
+	p->color = SAND_COLOR;
 	p->color = Color{
 		p->color.r,
 		(u8)(p->color.g + p->offset.g),
@@ -33,20 +34,25 @@ void init_sand(Particle* p)
 
 void update_draw_sand(Particle* p, f32 dt)
 {
-	calculate_next_move(p);
+	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
+	bool has_stopped = calculate_next_move(p);
+	if (has_stopped)
+	{
+		p->vel = Vector2{};
+	}
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }
 
-static void calculate_next_move(Particle* p)
+static bool calculate_next_move(Particle* p)
 {
 	i32 sx = p->pos.x;
-	i32 sy = p->pos.y + 1;
+	i32 sy = p->pos.y + p->vel.y;
 
 	// Vertically out of bounds, do not consider.
 	if (!is_inbounds(0, sy))
 	{
-		return;
+		return true;
 	}
 
 	i32 push_ind = 0;
@@ -73,14 +79,17 @@ static void calculate_next_move(Particle* p)
 	if (push_ind == 0)
 	{
 		p->next_pos = p->pos;
-		return;
+		return true;
 	}
 
 	i32 *rand_next_pos = RAND_POOL_SAND[GetRandomValue(0, push_ind - 1)];
 	p->next_pos = Vector2{ (f32)rand_next_pos[0], (f32)rand_next_pos[1] };
+
+	return false;
 }
 
 static bool is_blocking(i32 x, i32 y)
 {
-	return (grid_arr[y * MAX_WIDTH + x].type & BLOCKING_BITS_SAND);
+	i32 coord = y * MAX_WIDTH + x;
+	return grid_arr[coord].type & BLOCKING_BITS_SAND;
 }

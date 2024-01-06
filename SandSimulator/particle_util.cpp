@@ -6,7 +6,14 @@ static const char* particle_types[] = {
 	"AIR",
 	"SAND",
 	"WATER",
-	"STONE"
+	"STONE",
+	"ACID",
+	"TOXIC GAS",
+	"STEAM",
+	"LAVA",
+	"FIRE",
+	"SMOKE",
+	"WOOD"
 };
 
 bool is_inbounds(i32 x, i32 y)
@@ -18,7 +25,6 @@ bool is_inbounds_v(Vector2 pos)
 {
 	return pos.x >= 0 && pos.x < MAX_WIDTH && pos.y >= 0 && pos.y < MAX_HEIGHT;
 }
-
 
 void ParticleType_snprintf(char *buffer, usize size, char *fmt, ParticleIndex index)
 {
