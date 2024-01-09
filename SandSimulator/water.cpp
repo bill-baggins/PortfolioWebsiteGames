@@ -7,6 +7,8 @@
 static bool calculate_next_move(Particle* p);
 static bool is_blocking(i32 x, i32 y);
 
+static i32 WATER_EXCLUSION_BITS = AIR | TOXIC_GAS | STEAM | SMOKE | LAVA;
+
 static i32 MOVE_OPS_WATER[][2] = {
 	{ 0, 1},
 	{ -1, 1 },
@@ -20,13 +22,14 @@ void init_water(Particle* p)
 {
 	p->type = WATER;
 	p->index = I_WATER;
-	p->color = WATER_COLOR;
+	p->color = BLUE;
 	p->color = Color{
 		p->color.r,
 		(u8)(p->color.g + p->offset.g),
 		(u8)(p->color.b + p->offset.b),
 		200
 	};
+	p->health = 10;
 }
 
 void update_draw_water(Particle* p, f32 dt)
@@ -95,5 +98,88 @@ static bool calculate_next_move(Particle* p)
 static bool is_blocking(i32 x, i32 y)
 {
 	i32 coord = y * MAX_WIDTH + x;
-	return !(grid_arr[coord].type & (AIR | TOXIC_GAS | STEAM | SMOKE ));
+	return !(grid_arr[coord].type & WATER_EXCLUSION_BITS);
 }
+
+
+
+// Semi failed implementation of getting more realistic water physics.
+
+//#include "particle_funcs.h"
+//#include "world.h"
+//#include "globals.h"
+//
+//#include "raymath.h"
+//
+//#include <stdio.h>
+//
+//static bool calculate_next_move(Particle* p);
+//static bool is_blocking(i32 x, i32 y);
+//
+//static i32 MOVE_OPS_WATER[][2] = {
+//	{ 0, 1},
+//	{ -1, 1 },
+//	{ 1, 1},
+//	{ 1, 0 },
+//	{ -1, 0 },
+//};
+//static i32 RAND_POOL_WATER[5][2] = { 0 };
+//
+//void init_water(Particle* p)
+//{
+//	p->type = WATER;
+//	p->index = I_WATER;
+//	p->vel = Vector2{};
+//	p->color = WATER_COLOR;
+//	p->color = Color{
+//		p->color.r,
+//		(u8)(p->color.g + p->offset.g),
+//		(u8)(p->color.b + p->offset.b),
+//		200
+//	};
+//}
+//
+//void update_draw_water(Particle* p, f32 dt)
+//{
+//	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
+//	bool has_stopped = calculate_next_move(p);
+//	if (has_stopped)
+//	{
+//		p->vel = Vector2{};
+//	}
+//	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
+//	DrawTextureV(*p->texture, draw_pos, p->color);
+//}
+//
+//static bool calculate_next_move(Particle* p)
+//{
+//	i32 sx = p->pos.x;
+//	i32 sy = p->pos.y;
+//
+//	p->next_pos = p->pos;
+//
+//	for (i32 i = 0; i < 5; i++)
+//	{
+//		for (i32 j = (i32)p->vel.y; j >= 0; j--)
+//		{
+//			i32 dx = sx + MOVE_OPS_WATER[i][0] * j;
+//			i32 dy = sy + MOVE_OPS_WATER[i][1] * j;
+//
+//			if (is_inbounds(dx, dy) && !is_blocking(dx, dy))
+//			{
+//				p->next_pos = Vector2{ (f32)dx, (f32)dy };
+//				return false;
+//			}
+//		}
+//	}
+//
+//	return false;
+//}
+//
+//static bool is_blocking(i32 x, i32 y)
+//{
+//	i32 coord = y * MAX_WIDTH + x;
+//	return !(grid_arr[coord].type & (AIR | TOXIC_GAS | STEAM | SMOKE));
+//}
+
+

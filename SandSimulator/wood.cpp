@@ -11,6 +11,7 @@ void init_wood(Particle* p)
 		(u8)(p->color.b + p->offset.b),
 		255
 	};
+	p->health = 50;
 }
 
 void update_draw_wood(Particle* p, f32 dt)

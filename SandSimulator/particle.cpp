@@ -20,6 +20,7 @@ void Particle_init(Particle *p, ParticleType type, ParticleIndex index, Color co
 	};
 	p->pos = pos;
 	p->next_pos = pos;
+	p->health = 0;
 	p->vel = Vector2{};
 	p->texture = texture;
 }

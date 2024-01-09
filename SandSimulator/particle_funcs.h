@@ -64,6 +64,7 @@ struct Particle
 
 	ParticleType type;
 	ParticleIndex index;
+	i32 health;
 	Color color;
 	Color offset;
 };

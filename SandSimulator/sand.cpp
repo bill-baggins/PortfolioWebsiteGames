@@ -10,7 +10,7 @@
 static bool calculate_next_move(Particle* p);
 static bool is_blocking(i32 x, i32 y);
 
-static i32 BLOCKING_BITS_SAND = SAND | STONE;
+static i32 BLOCKING_BITS_SAND = SAND | STONE | WOOD;
 static i32 MOVE_OPS_SAND[][2] = {
 	{ 0, 1 },
 	{ 1, 1 },
@@ -30,6 +30,7 @@ void init_sand(Particle* p)
 		(u8)(p->color.b + p->offset.b),
 		255
 	};
+	p->health = 20;
 }
 
 void update_draw_sand(Particle* p, f32 dt)

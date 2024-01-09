@@ -30,6 +30,7 @@ void init_acid(Particle* p)
 		(u8)(p->color.b + p->offset.b),
 		200
 	};
+	p->health = 0;
 }
 
 void update_draw_acid(Particle* p, f32 dt)
@@ -105,10 +106,11 @@ static bool calculate_next_move(Particle* p)
 	if (grid_arr[coord].type != AIR)
 	{
 		init_func[I_TOXIC_GAS](&grid_arr[coord]);
-		if (random_value > 0.3f)
+		if (random_value > 0.0675f)
 		{
 			init_func[I_AIR](p);
 		}
+		
 	}
 
 	return false;

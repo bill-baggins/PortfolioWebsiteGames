@@ -11,6 +11,7 @@ void init_stone(Particle* p)
 		(u8)(p->color.b + p->offset.b),
 		255
 	};
+	p->health = 200;
 }
 
 void update_draw_stone(Particle* p, f32 dt)

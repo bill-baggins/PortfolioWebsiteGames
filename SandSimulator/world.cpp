@@ -15,7 +15,7 @@
 
 // TODO: This is windows specific...
 // // See omment down bleow about this.
-// #include <ppl.h>
+#include <ppl.h>
 
 
 static bool is_within_radius(f32 x, f32 y, f32 radius);
@@ -48,6 +48,11 @@ void World_update_draw(World* w, f32 dt)
 	ClearBackground(DARKGRAY);
 
 
+	/*concurrency::parallel_for(0, MAX_WIDTH * MAX_HEIGHT, [&](usize i) {
+		Particle* particle = &grid_arr[i];
+		update_draw_func[particle->index](particle, dt);
+	});*/
+
 	for (i32 i = 0; i < MAX_WIDTH * MAX_HEIGHT; i++)
 	{
 		Particle* particle = &grid_arr[i];
@@ -56,6 +61,24 @@ void World_update_draw(World* w, f32 dt)
 
 	// Could use the concurrency::parallel_for() funcitons from the windows
 	// header ppl.h, but for simiplicity I am sticking with a normal for loop.
+
+	/*concurrency::parallel_for(0, MAX_WIDTH * MAX_HEIGHT, [&](usize i) {
+		Particle particle = grid_arr[i];
+
+		usize nx = particle.next_pos.x;
+		usize ny = particle.next_pos.y;
+		Vector2 pos = grid_arr[i].pos;
+
+		grid_arr[i] = grid_arr[ny * MAX_WIDTH + nx];
+		grid_arr[ny * MAX_WIDTH + nx] = particle;
+
+		grid_arr[ny * MAX_WIDTH + nx].pos = particle.next_pos;
+		grid_arr[ny * MAX_WIDTH + nx].next_pos = grid_arr[ny * MAX_WIDTH + nx].pos;
+
+		grid_arr[i].pos = pos;
+		grid_arr[i].next_pos = grid_arr[i].pos;
+	});*/
+
 	for (i32 i = 0; i < MAX_WIDTH * MAX_HEIGHT; i++) {
 		Particle particle = grid_arr[i];
 
@@ -107,7 +130,12 @@ void World_deinit(World* w)
 static void World_input(World* w, f32 dt)
 {
 
-	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+	if (IsKeyPressed(KEY_TAB))
+	{
+		w->show_window = !w->show_window;
+	}
+
+	if (!w->show_window && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 	{
 		Vector2 clicked_pos = GetMousePosition();
 		clicked_pos.x /= PIXEL_WIDTH;
@@ -118,10 +146,6 @@ static void World_input(World* w, f32 dt)
 		}
 	}
 	
-	if (IsKeyPressed(KEY_TAB))
-	{
-		w->show_window = !w->show_window;
-	}
 
 	if (IsKeyDown(KEY_LEFT_CONTROL))
 	{

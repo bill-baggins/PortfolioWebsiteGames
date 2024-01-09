@@ -8,7 +8,7 @@ static bool calculate_next_move(Particle* p);
 static bool is_blocking(i32 x, i32 y);
 static void handle_particle_interaction(Particle* p, i32 x, i32 y);
 
-static i32 LAVA_EXCLUSION_BITS = AIR | SAND | WATER | ACID | WOOD | FIRE;
+static i32 LAVA_EXCLUSION_BITS = AIR | SAND | WATER | ACID | WOOD | FIRE | STEAM | SMOKE | TOXIC_GAS;
 
 static i32 MOVE_OPS_LAVA[][2] = {
 	{ 0, 1},
@@ -30,6 +30,7 @@ void init_lava(Particle* p)
 		0,
 		245
 	};
+	p->health = 0;
 }
 
 void update_draw_lava(Particle* p, f32 dt)
@@ -128,7 +129,11 @@ static void handle_particle_interaction(Particle* p, i32 x, i32 y)
 		break;
 	case WOOD:
 		init_func[I_FIRE](&grid_arr[coord]);
-		p->next_pos = p->pos;
+		break;
+	case SMOKE:
+	case STEAM:
+	case TOXIC_GAS:
+	case FIRE:
 		break;
 	default:
 		init_func[I_LAVA](&grid_arr[coord]);

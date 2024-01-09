@@ -43,6 +43,14 @@ void update_draw_steam(Particle* p, f32 dt)
 
 static bool calculate_next_move(Particle* p)
 {
+	i32 despawn_chance = (f32)1 / (f32)GetRandomValue(1, 64);
+	if (despawn_chance >= 0.5f)
+	{
+		init_func[I_AIR](p);
+		p->next_pos = p->pos;
+		return false;
+	}
+
 	i32 sx = p->pos.x;
 	i32 sy = p->pos.y;
 

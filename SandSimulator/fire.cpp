@@ -12,14 +12,14 @@ static bool can_burn(i32 x, i32 y);
 
 static i32 CAN_BURN_BITS = WOOD;
 static i32 MOVE_OPS_FIRE[][2] = {
+	{ 0, -1 }, 
+	{-1, -1},
+	{1, -1},
+	{-1, 1},
 	{ -1, 0 },
-	{ 0, -1 },
 	{ 1,  0},
 	{ 0,  1},
-	{-1, -1},
-	{-1, 1},
 	{1, 1},
-	{1, -1},
 };
 
 void init_fire(Particle* p)
@@ -33,6 +33,7 @@ void init_fire(Particle* p)
 		0,
 		150
 	};
+	p->health = 0;
 }
 
 void update_draw_fire(Particle* p, f32 dt)
@@ -51,21 +52,6 @@ static bool calculate_next_move(Particle* p)
 	if (!is_inbounds(0, sy))
 	{
 		return true;
-	}
-
-	i32 air_count = 0;
-
-	for (i32 i = 0; i < 8; i++) 
-	{
-		i32 x = sx + MOVE_OPS_FIRE[i][0];
-		i32 y = sy + MOVE_OPS_FIRE[i][1];
-		i32 coord = y * MAX_WIDTH + x;
-
-		if (is_inbounds(x, y) && grid_arr[coord].type & AIR)
-		{
-			air_count += 1;
-			if (air_count == 4) break;
-		}
 	}
 
 	for (i32 i = 0; i < 8; i++)
@@ -88,7 +74,8 @@ static bool calculate_next_move(Particle* p)
 		}
 	}
 
-	if (air_count == 4)
+	f32 despawn_chance = (f32)1 / (f32)GetRandomValue(1, 64);
+	if (despawn_chance > 0.40f)
 	{
 		init_func[I_SMOKE](p);
 	}
