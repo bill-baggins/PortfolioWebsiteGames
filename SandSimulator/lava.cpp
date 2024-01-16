@@ -111,8 +111,8 @@ static void handle_particle_interaction(Particle* p, i32 x, i32 y)
 	switch (grid_arr[coord].type)
 	{
 	case ACID:
-		init_func[I_STONE](p);
-		init_func[I_TOXIC_GAS](&grid_arr[coord]);
+		init_func[I_TOXIC_GAS](p);
+		init_func[I_FIRE](&grid_arr[coord]);
 		break;
 	case WATER:
 		init_func[I_STONE](p);

@@ -10,7 +10,7 @@
 static bool calculate_next_move(Particle* p);
 static bool can_burn(i32 x, i32 y);
 
-static i32 CAN_BURN_BITS = WOOD;
+static i32 CAN_BURN_BITS = WOOD | TOXIC_GAS | ACID;
 static i32 MOVE_OPS_FIRE[][2] = {
 	{ 0, -1 }, 
 	{-1, -1},
@@ -68,7 +68,19 @@ static bool calculate_next_move(Particle* p)
 
 		if (rand_threshold > 0.22f && can_burn(x, y))
 		{
-			init_func[I_FIRE](&grid_arr[coord]);
+			switch (grid_arr[coord].type)
+			{
+			case ACID:
+				init_func[I_TOXIC_GAS](&grid_arr[coord]);
+				init_func[I_FIRE](p);
+				break;
+			case TOXIC_GAS:
+			case WOOD:
+				init_func[I_FIRE](&grid_arr[coord]);
+				break;
+			default:
+				break;
+			}
 			p->next_pos = Vector2{ (f32)x, (f32)y };
 			return false;
 		}
