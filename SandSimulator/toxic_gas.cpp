@@ -34,9 +34,13 @@ void init_toxic_gas(Particle* p)
 	};
 }
 
-void update_draw_toxic_gas(Particle* p, f32 dt)
+void update_toxic_gas(Particle* p, f32 dt)
 {
 	bool _ = calculate_next_move(p);
+}
+
+void draw_toxic_gas(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }

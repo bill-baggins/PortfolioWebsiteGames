@@ -7,16 +7,24 @@
 constexpr i32 SCREEN_WIDTH(1200);
 constexpr i32 SCREEN_HEIGHT(720);
 
-constexpr i32 MAX_WIDTH(SCREEN_WIDTH / 4);
-constexpr i32 MAX_HEIGHT(SCREEN_HEIGHT / 4);
+constexpr i32 MAX_WIDTH(SCREEN_WIDTH / 3);
+constexpr i32 MAX_HEIGHT(SCREEN_HEIGHT / 3);
 
 constexpr i32 PIXEL_WIDTH(SCREEN_WIDTH / MAX_WIDTH);
 constexpr i32 PIXEL_HEIGHT(SCREEN_HEIGHT / MAX_HEIGHT);
 
-constexpr i32 MIN_BLOB_RADIUS(1);
+constexpr i32 CHUNK_WIDTH(32);
+constexpr i32 CHUNK_HEIGHT(32);
+
+constexpr i32 WORLD_CHUNK_WIDTH(MAX_WIDTH / CHUNK_WIDTH);
+constexpr i32 WORLD_CHUNK_HEIGHT(MAX_HEIGHT / CHUNK_HEIGHT);
+
+constexpr i32 MIN_BLOB_RADIUS(4);
 constexpr i32 MAX_BLOB_RADIUS(30);
 
-constexpr f32 GRAVITY(4.2);
-constexpr f32 TERM_VEL(12.14);
+constexpr f32 GRAVITY(5.2f);
+constexpr f32 TERM_VEL(12.14f);
+
+constexpr i32 MAX_THREADS(2);
 
 #endif

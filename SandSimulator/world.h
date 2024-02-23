@@ -6,11 +6,15 @@
 #include "globals.h"
 #include <cstdio>
 
+#include <thread>
+#include <vector>
+
 struct World
 {
 	Texture sand_texture;
 	Color background_color;
 	usize particle_types;
+
 
 	f32 blob_radius;
 	enum ParticleIndex type_index;
@@ -18,7 +22,10 @@ struct World
 };
 
 void World_init(World* w);
-void World_update_draw(World* w, f32 dt);
+
+void World_update(World* w, f32 dt);
+
+void World_draw(World* w, f32 dt);
 void World_deinit(World* w);
 
 #endif

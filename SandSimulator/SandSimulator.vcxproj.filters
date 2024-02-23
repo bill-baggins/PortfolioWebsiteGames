@@ -27,9 +27,6 @@
     <ClCompile Include="world.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="air.cpp">
-      <Filter>Source Files\particle</Filter>
-    </ClCompile>
     <ClCompile Include="particle_util.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
@@ -67,6 +64,9 @@
       <Filter>Source Files\particle</Filter>
     </ClCompile>
     <ClCompile Include="smoke.cpp">
+      <Filter>Source Files\particle</Filter>
+    </ClCompile>
+    <ClCompile Include="air.cpp">
       <Filter>Source Files\particle</Filter>
     </ClCompile>
   </ItemGroup>

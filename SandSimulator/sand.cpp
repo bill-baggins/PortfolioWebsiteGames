@@ -31,9 +31,10 @@ void init_sand(Particle* p)
 		255
 	};
 	p->health = 20;
+	p->vel = Vector2{};
 }
 
-void update_draw_sand(Particle* p, f32 dt)
+void update_sand(Particle* p, f32 dt)
 {
 	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
 	bool has_stopped = calculate_next_move(p);
@@ -41,6 +42,10 @@ void update_draw_sand(Particle* p, f32 dt)
 	{
 		p->vel = Vector2{};
 	}
+}
+
+void draw_sand(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }

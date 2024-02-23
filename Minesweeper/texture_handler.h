@@ -9,16 +9,17 @@
 class TextureHandler
 {
 public:
-	TextureHandler(float scale);
+    explicit TextureHandler();
+	explicit TextureHandler(float scale);
 	~TextureHandler();
 
     void draw_texture(TextureType type, Vector2 pos);
 
 private:
-    float     width, height;
-    Texture   atlas;
+    float     m_width, m_height;
+    Texture   m_atlas;
 
-    std::unordered_map<TextureType, Rectangle> texture_map;
+    std::unordered_map<TextureType, Rectangle> m_texture_map;
 };
 
 #endif

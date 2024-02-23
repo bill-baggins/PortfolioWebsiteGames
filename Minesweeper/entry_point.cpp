@@ -11,7 +11,7 @@ EntryPoint::EntryPoint()
 	SetTargetFPS(Globals::FPS);
 	SetExitKey(0);
 
-	m_current_scene = std::make_unique<MainGameLoop>(this);
+	m_current_scene = std::make_unique<MainGameScene>(this);
 }
 
 EntryPoint::~EntryPoint()

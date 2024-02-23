@@ -42,14 +42,19 @@ int main()
 
 	LOG_DEBUG("Size of the array: %llu", sizeof(grid_arr));
 
-	
-
 	while (!WindowShouldClose())
 	{
 		f32 dt = GetFrameTime();
 
+		if (IsKeyPressed(KEY_ESCAPE))
+		{
+			ToggleFullscreen();
+		}
+
+		World_update(&world, dt);
+
 		BeginDrawing();
-		World_update_draw(&world, dt);
+		World_draw(&world, dt);
 		DrawFPS(0, 0);
 		EndDrawing();
 	}

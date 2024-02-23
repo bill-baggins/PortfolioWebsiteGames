@@ -34,11 +34,16 @@ void init_fire(Particle* p)
 		150
 	};
 	p->health = 0;
+	p->vel = Vector2{};
 }
 
-void update_draw_fire(Particle* p, f32 dt)
+void update_fire(Particle* p, f32 dt)
 {
 	bool _ = calculate_next_move(p);
+}
+
+void draw_fire(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }
@@ -77,6 +82,7 @@ static bool calculate_next_move(Particle* p)
 			case TOXIC_GAS:
 			case WOOD:
 				init_func[I_FIRE](&grid_arr[coord]);
+				// grid_arr[coord].type = static_cast<ParticleType>(static_cast<i32>(WOOD) | static_cast<i32>(FIRE));
 				break;
 			default:
 				break;

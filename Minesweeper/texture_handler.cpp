@@ -1,21 +1,27 @@
 #include "texture_handler.h"
 
+TextureHandler::TextureHandler() : 
+	m_width(0),
+	m_height(0),
+	m_atlas(Texture{})
+{}
+
 TextureHandler::TextureHandler(float scale)
 {
 	using enum TextureType;
 
-	width = 30 * scale;
-	height = 30 * scale;
+	m_width = 30 * scale;
+	m_height = 30 * scale;
 
-	float w = width;
-	float h = height;
+	float w = m_width;
+	float h = m_height;
 	float gap = 3 * scale;
 	
 	Image im_atlas = LoadImage("resources/minesweeper.png");
 	ImageResize(&im_atlas, scale, scale);
-	atlas = LoadTextureFromImage(im_atlas);
+	m_atlas = LoadTextureFromImage(im_atlas);
 
-	texture_map = {
+	m_texture_map = {
 		{ UNSELECTED, Rectangle{.x = (10.0f * scale) + (1 * w) + (gap * scale * 1), .y = h, .width = w, .height = h} },
 		{ EMPTY,      Rectangle{.x = (10.0f * scale) + (2 * w) + (gap * scale * 2), .y = h, .width = w, .height = h} },
 		{ ONE,        Rectangle{.x = (10.0f * scale) + (3 * w) + (gap * scale * 3), .y = h, .width = w, .height = h} },
@@ -34,12 +40,12 @@ TextureHandler::TextureHandler(float scale)
 
 TextureHandler::~TextureHandler()
 {
-	UnloadTexture(atlas);
+	UnloadTexture(m_atlas);
 }
 
 void TextureHandler::draw_texture(TextureType type, Vector2 pos)
 {
-	Rectangle src = texture_map.at(type);
-	Rectangle dest = Rectangle{ pos.x, pos.y, width, height };
-	DrawTexturePro(atlas, src, dest, Vector2{}, 0.f, WHITE);
+	Rectangle src = m_texture_map.at(type);
+	Rectangle dest = Rectangle{ pos.x, pos.y, m_width, m_height };
+	DrawTexturePro(m_atlas, src, dest, Vector2{}, 0.f, WHITE);
 }

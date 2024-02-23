@@ -24,6 +24,7 @@ void init_lava(Particle* p)
 	p->type = LAVA;
 	p->index = I_LAVA;
 	p->color = LAVA_COLOR;
+	p->vel = Vector2{};
 	p->color = Color{
 		(u8)(p->color.r - GetRandomValue(10, 30)),
 		(u8)(p->color.g - 40),
@@ -33,7 +34,7 @@ void init_lava(Particle* p)
 	p->health = 0;
 }
 
-void update_draw_lava(Particle* p, f32 dt)
+void update_lava(Particle* p, f32 dt)
 {
 	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
 	bool has_stopped = calculate_next_move(p);
@@ -41,6 +42,10 @@ void update_draw_lava(Particle* p, f32 dt)
 	{
 		p->vel = Vector2{};
 	}
+}
+
+void draw_lava(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }

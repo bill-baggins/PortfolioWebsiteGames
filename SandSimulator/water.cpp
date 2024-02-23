@@ -7,6 +7,11 @@
 // chunks, but still important to note.
 // This performance issue also exists for acid.
 
+// Rishi suggested an "energy" system where each particle will start with a potential energy
+// (a "score") which will increase for every successful spot downwards it travels. This score can
+// be used to determine the number of spots to look at for possible movement options (instead of using
+// velocity). 
+
 #include "particle_funcs.h"
 #include "world.h"
 #include "globals.h"
@@ -18,6 +23,8 @@
 
 static void calculate_next_move(Particle* p, f32 dt);
 static bool is_blocking(i32 x, i32 y);
+
+static i32 WATER_EXCLUSION_BITS = (AIR | TOXIC_GAS | STEAM | SMOKE | ACID);
 
 static i32 MOVE_OPS_WATER[][2] = {
 	{ 0, 1},
@@ -41,10 +48,14 @@ void init_water(Particle* p)
 	};
 }
 
-void update_draw_water(Particle* p, f32 dt)
+void update_water(Particle* p, f32 dt)
 {
 	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
 	calculate_next_move(p, dt);
+}
+
+void draw_water(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }
@@ -58,25 +69,25 @@ static void calculate_next_move(Particle* p, f32 dt)
 
 	for (i32 i = 0; i < 5; i++)
 	{
-		bool at_y_limit = false;
+		bool reached_end_of_loop = false;
 		i32 y_limit = ceilf(p->vel.y) + 1;
 		for (i32 j = 0; j < y_limit; j++)
 		{
 			i32 dx = sx + MOVE_OPS_WATER[i][0] * j;
 			i32 dy = sy + MOVE_OPS_WATER[i][1] * j;
+			i32 coord = dy * MAX_WIDTH + dx;
 			if (j + 1 == y_limit)
 			{
-				at_y_limit = true;
+				reached_end_of_loop = true;
 			}
 
 			if (is_inbounds(dx, dy) && !is_blocking(dx, dy))
 			{
 				p->next_pos = Vector2{ (f32)dx, (f32)dy };
 			}
-
 		}
 
-		if (at_y_limit && !Vector2Equals(p->next_pos, p->pos))
+		if (reached_end_of_loop && !Vector2Equals(p->next_pos, p->pos))
 		{
 			return;
 		}
@@ -85,7 +96,6 @@ static void calculate_next_move(Particle* p, f32 dt)
 	if (Vector2Equals(p->next_pos, p->pos))
 	{
 		p->vel.y /= 1.025f;
-		p->vel.x /= 1.10f;
 	}
 }
 
@@ -93,7 +103,7 @@ static bool is_blocking(i32 x, i32 y)
 {
 	i32 coord = y * MAX_WIDTH + x;
 	ParticleType p_type = grid_arr[coord].type;
-	return !(p_type & (AIR | TOXIC_GAS | STEAM | SMOKE));
+	return !(p_type & WATER_EXCLUSION_BITS);
 }
 
 

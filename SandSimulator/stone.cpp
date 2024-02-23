@@ -12,11 +12,17 @@ void init_stone(Particle* p)
 		255
 	};
 	p->health = 200;
+	p->vel = Vector2{};
 }
 
-void update_draw_stone(Particle* p, f32 dt)
+void update_stone(Particle* p, f32 dt)
 {
 	p->next_pos = p->pos;
+}
+
+
+void draw_stone(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }

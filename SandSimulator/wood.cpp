@@ -12,11 +12,16 @@ void init_wood(Particle* p)
 		255
 	};
 	p->health = 50;
+	p->vel = Vector2{};
 }
 
-void update_draw_wood(Particle* p, f32 dt)
+void update_wood(Particle* p, f32 dt)
 {
 	p->next_pos = p->pos;
+}
+
+void draw_wood(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }

@@ -81,40 +81,45 @@ void Particle_init(Particle* p, ParticleType type, ParticleIndex index, Color co
 void Particle_free(Particle* p);
 
 void init_air(Particle* p);
-void update_draw_air(Particle* p, f32 dt);
-
 void init_sand(Particle* p);
-void update_draw_sand(Particle* p, f32 dt);
-
 void init_water(Particle* p);
-void update_draw_water(Particle* p, f32 dt);
-
 void init_stone(Particle* p);
-void update_draw_stone(Particle* p, f32 dt);
-
 void init_acid(Particle* p);
-void update_draw_acid(Particle* p, f32 dt);
-
 void init_toxic_gas(Particle* p);
-void update_draw_toxic_gas(Particle* p, f32 dt);
-
 void init_steam(Particle* p);
-void update_draw_steam(Particle* p, f32 dt);
-
 void init_lava(Particle* p);
-void update_draw_lava(Particle* p, f32 dt);
-
 void init_fire(Particle* p);
-void update_draw_fire(Particle* p, f32 dt);
-
 void init_smoke(Particle* p);
-void update_draw_smoke(Particle* p, f32 dt);
-
 void init_wood(Particle* p);
-void update_draw_wood(Particle* p, f32 dt);
+
+void update_air(Particle* p, f32 dt);
+void update_sand(Particle* p, f32 dt);
+void update_water(Particle* p, f32 dt);
+void update_stone(Particle* p, f32 dt);
+void update_acid(Particle* p, f32 dt);
+void update_toxic_gas(Particle* p, f32 dt);
+void update_steam(Particle* p, f32 dt);
+void update_lava(Particle* p, f32 dt);
+void update_fire(Particle* p, f32 dt);
+void update_smoke(Particle* p, f32 dt);
+void update_wood(Particle* p, f32 dt);
+
+void draw_air(Particle* p, f32 dt);
+void draw_sand(Particle* p, f32 dt);
+void draw_water(Particle* p, f32 dt);
+void draw_stone(Particle* p, f32 dt);
+void draw_acid(Particle* p, f32 dt);
+void draw_toxic_gas(Particle* p, f32 dt);
+void draw_steam(Particle* p, f32 dt);
+void draw_lava(Particle* p, f32 dt);
+void draw_fire(Particle* p, f32 dt);
+void draw_smoke(Particle* p, f32 dt);
+void draw_wood(Particle* p, f32 dt);
 
 typedef void (*ParticleInitDelegate)(Particle*);
-typedef void (*ParticleUpdateDrawDelegate)(Particle*, f32 dt);
+typedef void (*ParticleUpdateDelegate)(Particle*, f32 dt);
+
+typedef void (*ParticleDrawDelegate)(Particle*, f32 dt);
 
 static Color PARTICLE_COLORS[] = {
 	Color{},
@@ -146,18 +151,32 @@ static ParticleInitDelegate init_func[] = {
 	init_wood,
 };
 
-static ParticleUpdateDrawDelegate update_draw_func[] = {
-	update_draw_air,
-	update_draw_sand,
-	update_draw_water,
-	update_draw_stone,
-	update_draw_acid,
-	update_draw_toxic_gas,
-	update_draw_steam,
-	update_draw_lava,
-	update_draw_fire,
-	update_draw_smoke,
-	update_draw_wood,
+static ParticleUpdateDelegate update_func[] = {
+	update_air,
+	update_sand,
+	update_water,
+	update_stone,
+	update_acid,
+	update_toxic_gas,
+	update_steam,
+	update_lava,
+	update_fire,
+	update_smoke,
+	update_wood,
+};
+
+static ParticleDrawDelegate draw_func[] = {
+	draw_air,
+	draw_sand,
+	draw_water,
+	draw_stone,
+	draw_acid,
+	draw_toxic_gas,
+	draw_steam,
+	draw_lava,
+	draw_fire,
+	draw_smoke,
+	draw_wood,
 };
 
 

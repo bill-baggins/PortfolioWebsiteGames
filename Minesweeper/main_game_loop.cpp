@@ -7,17 +7,18 @@
 
 #include <iostream>
 
-MainGameLoop::MainGameLoop(EntryPoint* entry_point)
+MainGameScene::MainGameScene(EntryPoint* entry_point)
 {
 	m_entry_point = entry_point;
+	m_th = TextureHandler(1.f);
 }
 
-MainGameLoop::~MainGameLoop()
+MainGameScene::~MainGameScene()
 {
 	std::cout << "destructed the main game loop classs \n";
 }
 
-void MainGameLoop::update(float dt)
+void MainGameScene::update(float dt)
 {
 	if (IsKeyPressed(KEY_ESCAPE))
 	{
@@ -28,11 +29,13 @@ void MainGameLoop::update(float dt)
 
 }
 
-void MainGameLoop::draw()
+void MainGameScene::draw()
 {
 	BeginDrawing();
 
 	ClearBackground(SKYBLUE);
+	
+
 
 	EndDrawing();
 }

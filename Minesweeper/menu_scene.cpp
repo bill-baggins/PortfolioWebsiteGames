@@ -19,7 +19,7 @@ void MenuScene::update(float dt)
 {
 	if (IsKeyPressed(KEY_ESCAPE))
 	{
-		m_entry_point->m_current_scene = std::make_unique<MainGameLoop>(m_entry_point);
+		m_entry_point->m_current_scene = std::make_unique<MainGameScene>(m_entry_point);
 		return;
 	}
 }

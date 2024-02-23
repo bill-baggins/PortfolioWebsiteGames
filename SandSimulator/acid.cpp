@@ -1,18 +1,19 @@
 #include "particle_funcs.h"
 #include "world.h"
 #include "globals.h"
+#include "raymath.h"
 
 #include <cstdio>
 
-static bool calculate_next_move(Particle* p);
+static void calculate_next_move(Particle* p);
 static bool is_blocking(i32 x, i32 y);
 
 static i32 MOVE_OPS_ACID[][2] = {
 	{ 0, 1},
 	{ -1, 1 },
 	{ 1, 1},
-	{ 1, 0 },
 	{ -1, 0 },
+	{ 1, 0 },
 };
 static i32 RAND_POOL_ACID[5][2] = { 0 };
 
@@ -31,89 +32,69 @@ void init_acid(Particle* p)
 		200
 	};
 	p->health = 0;
+	p->vel = Vector2{};
 }
 
-void update_draw_acid(Particle* p, f32 dt)
+void update_acid(Particle* p, f32 dt)
 {
 	p->vel.y += std::min(GRAVITY * dt, TERM_VEL);
-	bool has_stopped = calculate_next_move(p);
-	if (has_stopped)
-	{
-		p->vel = Vector2{};
-	}
+	calculate_next_move(p);
+}
+
+void draw_acid(Particle* p, f32 dt)
+{
 	Vector2 draw_pos = Vector2{ p->pos.x * PIXEL_WIDTH, p->pos.y * PIXEL_HEIGHT };
 	DrawTextureV(*p->texture, draw_pos, p->color);
 }
 
-static bool calculate_next_move(Particle* p)
+static void calculate_next_move(Particle* p)
 {
 	i32 sx = p->pos.x;
-	i32 sy = p->pos.y + p->vel.y;
+	i32 sy = p->pos.y;
 
-	// Vertically out of bounds, do not consider.
-	if (!is_inbounds(0, sy))
-	{
-		return true;
-	}
-
-	i32 push_ind = 0;
 	f32 random_value = (f32)1 / (f32)GetRandomValue(0, 64);
+
+	p->next_pos = p->pos;
 
 	for (i32 i = 0; i < 5; i++)
 	{
-		i32 x = sx + MOVE_OPS_ACID[i][0];
-		i32 y = sy + MOVE_OPS_ACID[i][1];
-
-		if (!is_inbounds(x, y))
+		bool reached_end_of_loop = false;
+		i32 y_limit = ceilf(p->vel.y) + 1;
+		for (i32 j = 0; j < y_limit; j++)
 		{
-			continue;
-		}
-
-		if (i == 0 && !is_blocking(x, y))
-		{
-			i32 coord = y * MAX_WIDTH + x;
-			p->next_pos = Vector2{ (f32)x, (f32)y };
-			if (grid_arr[coord].type != AIR)
+			i32 dx = sx + MOVE_OPS_ACID[i][0] * (j * 1.2f);
+			i32 dy = sy + MOVE_OPS_ACID[i][1] * j;
+			if (j + 1 == y_limit)
 			{
-				init_func[I_TOXIC_GAS](&grid_arr[coord]);
-				if (random_value > 0.0675f)
+				reached_end_of_loop = true;
+			}
+
+			if (is_inbounds(dx, dy) && !is_blocking(dx, dy))
+			{
+				i32 coord = dy * MAX_WIDTH + dx;
+				p->next_pos = Vector2{ (f32)dx, (f32)dy };
+				if (grid_arr[coord].type != AIR)
 				{
-					init_func[I_AIR](p);
+					init_func[I_TOXIC_GAS](&grid_arr[coord]);
+					if (random_value > 0.0675f)
+					{
+						init_func[I_AIR](p);
+					}
 				}
 			}
-			return false;
+
 		}
 
-		if (!is_blocking(x, y))
+		if (reached_end_of_loop && !Vector2Equals(p->next_pos, p->pos))
 		{
-			RAND_POOL_ACID[push_ind][0] = x;
-			RAND_POOL_ACID[push_ind][1] = y;
-			push_ind++;
+			return;
 		}
 	}
 
-	// means that no spot was found, just set the next pos to
-	// what it is.
-	if (push_ind == 0)
+	if (Vector2Equals(p->next_pos, p->pos))
 	{
-		p->next_pos = p->pos;
-		return true;
+		p->vel.y /= 1.025f;
 	}
-
-	i32* rand_next_pos = RAND_POOL_ACID[GetRandomValue(0, push_ind - 1)];
-	i32 coord = rand_next_pos[1] * MAX_WIDTH + rand_next_pos[0];
-	p->next_pos = Vector2{ (f32)rand_next_pos[0], (f32)rand_next_pos[1] };
-	if (grid_arr[coord].type != AIR)
-	{
-		init_func[I_TOXIC_GAS](&grid_arr[coord]);
-		if (random_value > 0.0675f)
-		{
-			init_func[I_AIR](p);
-		}
-		
-	}
-
-	return false;
 }
 
 static bool is_blocking(i32 x, i32 y)

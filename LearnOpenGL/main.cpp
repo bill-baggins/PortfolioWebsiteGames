@@ -388,14 +388,14 @@ i32 main(i32 argc, char* argv[])
 			rect_vel.y *= -1;
 		}
 
-		angle += angle_increment;
+		/*angle += angle_increment;
 		if (angle > glm::two_pi<f32>())
 		{
 			angle = 0.0f;
-		}
+		}*/
 
 		glm::mat4 transform(1.0f);
-		transform = glm::translate(transform, glm::vec3(rect_pos.x, rect_pos.y, 0.0));
+		// transform = glm::translate(transform, glm::vec3(rect_pos.x, rect_pos.y, 0.0));
 		transform = glm::rotate(transform, angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glProgramUniform1fv(triangle_shader, glGetUniformLocation(triangle_shader, "time_elapsed"), 1, &time_elapsed);
