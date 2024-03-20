@@ -10,7 +10,7 @@
 
 #include "raylib.h"
 
-char* string_copy(str_t str)
+char* string_copy(char* str)
 {
 	if (str == NULL) return NULL;
 

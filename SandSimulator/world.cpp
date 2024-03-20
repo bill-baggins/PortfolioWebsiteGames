@@ -141,7 +141,6 @@ void World_deinit(World* w)
 
 static void World_input(World* w, f32 dt)
 {
-
 	if (IsKeyPressed(KEY_TAB))
 	{
 		w->show_window = !w->show_window;

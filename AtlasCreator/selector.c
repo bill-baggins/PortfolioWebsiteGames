@@ -169,7 +169,7 @@ void Selector_update(Selector* s, f32 dt)
 			{
 				s->camera.zoom = min(s->camera.zoom * scroll, MAX_ZOOM);
 			}
-
+			
 			Vector2 pos = GetScreenToWorld2D(mouse_pos, s->camera);
 			s->camera.offset = mouse_pos;
 			s->camera.target = pos;
