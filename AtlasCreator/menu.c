@@ -161,7 +161,6 @@ static void Menu_draw_layout(Menu* m)
 		for (i32 i = 0; i < arrlen(m->groups_arr); i++)
 		{
 			char rectangle_string[32] = { 0 };
-			memset(rectangle_string, 0, 32);
 
 			TileGroup tile_group = m->groups_arr[i];
 			if (igTreeNode_Str(tile_group.name))

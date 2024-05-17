@@ -22,9 +22,7 @@ struct World
 };
 
 void World_init(World* w);
-
 void World_update(World* w, f32 dt);
-
 void World_draw(World* w, f32 dt);
 void World_deinit(World* w);
 

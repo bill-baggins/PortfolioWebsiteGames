@@ -17,7 +17,7 @@ int main()
 	SetTargetFPS(60);
 	SetExitKey(0);
 
-	World world;
+	World world = { 0 };
 	World_init(&world);
 
 	rlImGuiSetup(true);

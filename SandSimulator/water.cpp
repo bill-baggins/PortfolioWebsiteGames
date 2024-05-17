@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 
+
 static void calculate_next_move(Particle* p, f32 dt);
 static bool is_blocking(i32 x, i32 y);
 
@@ -40,7 +41,7 @@ void init_water(Particle* p)
 	p->index = I_WATER;
 	p->vel = Vector2{};
 	p->color = WATER_COLOR;
-	p->color = Color{
+	p->color = Color {
 		p->color.r,
 		(u8)(p->color.g + p->offset.g),
 		(u8)(p->color.b + p->offset.b),
@@ -93,7 +94,7 @@ static void calculate_next_move(Particle* p, f32 dt)
 		}
 	}
 
-	if (Vector2Equals(p->next_pos, p->pos))
+	if (p->next_pos.y - p->pos.y < 0.0001)
 	{
 		p->vel.y /= 1.025f;
 	}

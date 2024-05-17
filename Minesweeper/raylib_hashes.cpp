@@ -1,7 +1,6 @@
 #include "raylib_hashes.h"
 #include "raylib.h"
 
-#include <functional>
 
 bool operator==(const struct Rectangle& a, const struct Rectangle& b)
 {
